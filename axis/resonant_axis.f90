@@ -6,7 +6,7 @@ contains
     ! Parameters: resonance — array of Integer (6 numbers)
     ! a_* — semimajor axis of body, n_* — mean motion, l_* — mean longitude
     ! return float — the corresponding value for given resonance of semimajor axis
-    function count_axis(resonance, a_j, n_j, l_j, a_s, n_s, l_s, a_a, n_a, l_a)
+    function count_axis(resonance, a_j, n_j, l_j, a_s, n_s, l_s)
         implicit none
 
         real :: a_j, n_j, l_j, a_s, n_s, l_s, a_a, n_a, l_a, eps

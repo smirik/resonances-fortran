@@ -1,6 +1,11 @@
 # Exec files
 axis/axis
 
+# Ignore test compiled files
+axis/TestRunner*
+axis/makeTestRunner
+*_fun.f90
+
 # Compiled Object files
 *.slo
 *.lo
