@@ -1,14 +1,17 @@
-main: main.o functions.o resonance_table.o
-	gfortran -o axis main.o functions.o resonance_table.o
+f90comp = gfortran
+objects = resonant_axis.o main.o
 
-functions.o: functions.f90  
-	gfortran -c functions.f90
+main: main.o resonant_axis.o
+	$(f90comp) -o axis $(objects)
 
-resonance_table.o: resonance_table.f90
-	gfortran -c resonance_table.f90
+resonant_axis.mod: resonant_axis.o resonant_axis.f90
+	$(f90comp) -c resonant_axis.f90
 
-main.o: main.f90
-	gfortran -c main.f90
+resonant_axis.o: resonant_axis.f90
+	$(f90comp) -c resonant_axis.f90
+
+main.o: main.f90 resonant_axis.mod
+	$(f90comp) -c main.f90
 
 clean:
-	rm -f *.o axis
+	rm -f *.o *.mod axis
