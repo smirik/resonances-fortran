@@ -13,5 +13,9 @@ resonant_axis.o: resonant_axis.f90
 main.o: main.f90 resonant_axis.mod
 	$(f90comp) -c main.f90
 
+test:
+	funit resonant_axis
+
 clean:
 	rm -f *.o *.mod axis
+	funit --clean
