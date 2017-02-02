@@ -36,12 +36,12 @@ test n_from_a_reverse_test
     assert_equal_within(a, 1.0, 1e-4)
 end test
 
-test count_axis_test
+test count_axis_3body_test
     real :: a
     real :: a_a, n_a, l_a
     real, dimension(6) :: resonance
     resonance = (/ 5.0, -2.0, -2.0, 0.0, 0.0, -1.0 /)
-    a = count_axis(resonance, 5.204267, 0.00145024678779705, 5.65063905672262e-08, 9.58201720, &
+    a = count_axis_3body(resonance, 5.204267, 0.00145024678779705, 5.65063905672262e-08, 9.58201720, &
                    0.000583991090866933, 3.74890765513312e-07)
     assert_equal_within(a, 3.17, 1e-2) ! resonance value for 5J-2S-2
 end test

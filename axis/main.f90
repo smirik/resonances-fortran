@@ -26,7 +26,7 @@ program resonances
                   exit k_loop
               end if
 
-              tmp = count_axis(resonance, a_j, n_j, l_j, a_s, n_s, l_s)
+              tmp = count_axis_3body(resonance, a_j, n_j, l_j, a_s, n_s, l_s)
 
               ! Order of resonance should be less than 7 and the resonant semi-axis should not be equal to 0
               if ( abs(diff) < order .AND. tmp > 0.0 ) then

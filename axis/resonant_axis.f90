@@ -6,11 +6,11 @@ contains
     ! Parameters: resonance — array of Integer (6 numbers)
     ! a_* — semimajor axis of body, n_* — mean motion, l_* — mean longitude
     ! return float — the corresponding value for given resonance of semimajor axis
-    function count_axis(resonance, a_j, n_j, l_j, a_s, n_s, l_s)
+    function count_axis_3body(resonance, a_j, n_j, l_j, a_s, n_s, l_s)
         implicit none
 
         real :: a_j, n_j, l_j, a_s, n_s, l_s, a_a, n_a, l_a, eps
-        real :: count_axis
+        real :: count_axis_3body
 
         real, dimension(6) :: resonance
 
@@ -18,19 +18,19 @@ contains
 
         n_a = (-resonance(1)*n_j - resonance(2)*n_s - resonance(4)*l_j - resonance(5)*l_s)/resonance(3)
         if (n_a < 0) then
-            count_axis = -1.0
+            count_axis_3body = -1.0
         else
             a_a = a_from_n(n_a) ! formula for s/a
             eps = (a_j - a_a)/a_j
             l_a = k/(2*pi)*(a_a/a_j)**0.5*(eps**2)*n_j
             n_a = (-resonance(1)*n_j - resonance(2)*n_s - resonance(4)*l_j - resonance(5)*l_s - resonance(3)*l_a)/resonance(3)
             a_a = a_from_n(n_a) ! formula for s/a
-            count_axis = a_a
+            count_axis_3body = a_a
         end if
-        if (isnan(count_axis)) then
-            count_axis = 0.0
+        if (isnan(count_axis_3body)) then
+            count_axis_3body = 0.0
         end if
-    end function count_axis
+    end function count_axis_3body
 
     ! get semimajor axis from mean motion
     ! n — mean motion of object
