@@ -6,6 +6,27 @@ contains
     ! Parameters: resonance — array of Integer (6 numbers)
     ! a_* — semimajor axis of body, n_* — mean motion, l_* — mean longitude
     ! return float — the corresponding value for given resonance of semimajor axis
+    
+    
+    
+real(8) function count_axis_2body(resonance, a1,m1)
+! Find axis by resonance (Kepler et al.)
+! Given:
+!   resonance - array of integer (4 numbers: m1,m,p1,p)
+!   a1 - semimajor axis of the planet (in AU)
+!   m1 - mass of the planet (in MSun)
+! Returns:
+!   <real(8)> - the corresponding semimajor axis for a given resonance
+
+    real(8):: a1,m1
+    integer,dimension(4):: resonance
+    
+    count_axis_2body= a1*(1d0+m1)**(-1d0/3d0)*abs(dble(resonance(2))/resonance(1))**(2d0/3d0)
+end function count_axis_2body
+
+
+
+
     function count_axis_3body(resonance, a_j, n_j, l_j, a_s, n_s, l_s)
         implicit none
 

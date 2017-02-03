@@ -36,6 +36,17 @@ test n_from_a_reverse_test
     assert_equal_within(a, 1.0, 1e-4)
 end test
 
+test count_axis_2body_test
+    real(8):: a1,m1,a
+    integer,dimension(4)::resonance
+    
+    resonance=(/ 5, -2, 0, -3 /) 
+    a1=5.20248019d0
+    m1=9.547919384243222d-4
+    a=count_axis_2body(resonance,a1,m1)
+    assert_equal_within(,2.8253d0,1d-3)
+end test
+
 test count_axis_3body_test
     real :: a
     real :: a_a, n_a, l_a
