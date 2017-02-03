@@ -1,17 +1,17 @@
-f90comp = gfortran
+comp = gfortran
 objects = resonant_axis.o main.o
 
 main: main.o resonant_axis.o
-	$(f90comp) -o axis $(objects)
+	$(comp) -O2 $^ -o axis
 
-resonant_axis.mod: resonant_axis.o resonant_axis.f90
-	$(f90comp) -c resonant_axis.f90
+main.o: main.f95 resonant_axis.mod
+	$(comp) -O2 -c main.f95
 
-resonant_axis.o: resonant_axis.f90
-	$(f90comp) -c resonant_axis.f90
+resonant_axis.o resonant_axis.mod: resonant_axis.f95
+	$(comp) -O2 -c $^
 
-main.o: main.f90 resonant_axis.mod
-	$(f90comp) -c main.f90
+result: axis
+	./axis
 
 test:
 	funit resonant_axis
