@@ -2,51 +2,59 @@ program resonant_axis_calculator
 
 use global_parameters
 use resonant_axis
+use id_matrix
+use resonance_finder
 implicit none
 
-    integer :: i,j,k,s
-    integer:: m1,m
-    integer, dimension(4) :: resonance
-    character(25)::co
-    integer:: planet_number
+    character(25)::co,asteroid
+    character(8):: pl_name
+    integer:: pl_id
+    real(8):: a,delta
 
-    ! Get planet name and ID
-    call get_command_argument(1,co)
-    planet_number=planet_id(trim(co))
-    open(unit=8,file="id_matrix_"//trim(co)//".dat",status='replace')
-    co='(4i4,f23.16)'
+!---------------------------------------------
+    write(*,*) 'Initiating idmatrix_2body...'
+    call init_idmatrix_2body()
+    write(*,*) 'Successfully done!'
+!---------------------------------------------
 
-    ! Get id. matrix for a planet bya given maximum order in G_P
-    do m1=1,max_order
-        do m=-1,-m1-max_order,-1
-            ! Waste already observed cases
-            if ( nod(abs(m),m1) /= 1) cycle
-            ! Look for main subresonance
-            resonance=(/ m1,m,0,-m1-m /)
-            write(8,co) resonance,&
-                count_axis_2body(resonance,a_pl(planet_number),m_pl(planet_number))
-        enddo
+
+! asteroid name, it's semimajor axis and delta (may be 0)
+    call get_command_argument(1,asteroid)
+
+    call get_command_argument(2,co)
+    read(co,*) a
+
+    call get_command_argument(3,co)
+    read(co,*) delta
+!--------------------------------------------------------
+
+
+! This part will be inmodulated in the future
+    do pl_id=1,9
+        select case(get_idmatrix_2body_status(pl_id))
+            case(0)
+                cycle
+            case(-1)
+                call add_idmatrix_2body(pl_id)
+            case default
+                pl_name=planet_name(pl_id)
+                write(*,*) 'Id. matrix for ',pl_name,&
+                    'is not neither in RAM nor in file and will be created now'
+                call make_id_matrix_2body(pl_name,gp_max_order)
+                call add_idmatrix_2body(pl_id)
+        end select
     enddo
-    close(8)
-    
-contains
+!--------------------------------------------
 
-integer function nod(a,b)
-! Find gcd - greatest common divisor
-! Given:
-!   a,b - positive integer numbers
-! Returns:
-!   <integer> - gcd
-    integer::a,b,c1,c2,c3,c4
-    
-    c1=a;c2=b
-    do while(c1 /= c2)
-        c3=c1
-        c4=c2
-        c1=min(c3,c4)
-        c2=abs(c3-c4)
-    enddo
-    nod=c1
-end function nod
+! Here is the place for playing
+
+    call get_all_possible_resonances_2body(trim(asteroid),a,delta)
+
+
+!--------------------------------------
+    write(*,*) 'Clearing memory...'
+    call clear_idmatrix_2body()
+    write(*,*) 'Done. Ending program.'
+!--------------------------------------
 
 end
