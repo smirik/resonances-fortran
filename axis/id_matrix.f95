@@ -1,12 +1,50 @@
 module id_matrix
 
     use global_parameters
+    use resonant_axis
     implicit none
 
 contains
 
 !----------------------------------------------------------------------------------------------
-    integer function get_idmatrix_2body_status(pl_id)
+    subroutine build_idmatrix_2body(pl_name, max_order)
+! Creates id. matrix (twobody case)
+! Given:
+!   pl_name - planet name IN CAPITALS
+!   max_order - maximum resonance order
+! Produces:
+!   file with idmatrix_2body
+        integer:: pl_id, un
+        integer, optional:: max_order
+        integer:: m1, m, m_o
+        character(8):: pl_name
+        character(14):: co = '(4i4,f23.16)'
+        integer, dimension(4):: resonance
+
+        pl_id = planet_id(pl_name)
+        un = 8 + pl_id
+        open (unit=un, file="id_matrix_"//trim(pl_name)//".dat", status='replace')
+        if (present(max_order)) then
+            m_o = max_order
+        else
+            m_o = gp_max_order
+        endif
+        ! Get id. matrix for a planet by a given maximum order
+        do m1 = 1, m_o
+            do m = -1, -m1 - m_o, -1
+                ! Waste already observed cases
+                if (gcd(abs(m), m1) /= 1) cycle
+                ! Look for main subresonance
+                resonance = (/m1, m, 0, -m1 - m/)
+                write (un, co) resonance, &
+                    count_axis_2body(resonance, a_pl(pl_id), m_pl(pl_id))
+            enddo
+        enddo
+        close (un)
+    end subroutine build_idmatrix_2body
+
+!----------------------------------------------------------------------------------------------
+    integer function get_idmatrix_2body_status(pl_id) result(s)
 ! Get information about idmatrix_2body existance
 ! Given:
 !   pl_id - Planet ID
@@ -15,11 +53,11 @@ contains
 !  -1 - idmatrix exists only as a file
 !  >0 - idmatrix does not exist
         character(8):: pl_name
-        integer:: s
         integer:: pl_id, un
 
         if (allocated(idmatrix_2body(pl_id)%matrix)) then
             s = 0
+            return
         else
             un = 8 + pl_id
             pl_name = planet_name(pl_id)
@@ -27,9 +65,9 @@ contains
             if (s == 0) then
                 close (un)
                 s = -1
+                return
             endif
         endif
-        get_idmatrix_2body_status = s
     end function get_idmatrix_2body_status
 
 !----------------------------------------------------------------------------------------------
@@ -39,25 +77,47 @@ contains
 !   pl_id - planet ID
 ! Produces:
 !   idmatrix_2body(pl_id)%matrix
-        integer:: pl_id, s, l, un
-        type(idmrow_2body), dimension(1000):: matrix
+        integer:: pl_id, s, l, un, i
+        type(idmrow_2body):: str
 
         un = 8 + pl_id
         l = 0
         open (unit=un, file='id_matrix_'//trim(planet_name(pl_id))//'.dat', action='read', iostat=s)
         if (s /= 0) then
-            write (*, *) 'Cannot add idmatrix for', planet_name(pl_id), 'from file. Sorry.'
+            write (*, *) 'Cannot add idmatrix for', planet_name(pl_id), 'from file - this file does not exist.'
             return
         endif
         do
-            l = l + 1
-            read (un, *, iostat=s) matrix(l)%resonance, matrix(l)%res_a
+            read (un, *, iostat=s) str
             if (s /= 0) exit
+            l = l + 1
         enddo
-        l = l - 1
-        close (un)
+        rewind (un)
+
         allocate (idmatrix_2body(pl_id)%matrix(1:l))
-        idmatrix_2body(pl_id)%matrix = matrix(1:l)
+        do i = 1, l
+            read (un, *) idmatrix_2body(pl_id)%matrix(i)
+        enddo
+        close (un)
+! TO DO - here is a weakness of the program with uncertainity of matrix length - need a cure
+!
+!         type(idmrow_2body), dimension(1000):: matrix
+!         un = 8 + pl_id
+!         l = 0
+!         open (unit=un, file='id_matrix_'//trim(planet_name(pl_id))//'.dat', action='read', iostat=s)
+!         if (s /= 0) then
+!             write (*, *) 'Cannot add idmatrix for', planet_name(pl_id), 'from file. Sorry.'
+!             return
+!         endif
+!         do
+!             l = l + 1
+!             read (un, *, iostat=s) matrix(l)%resonance, matrix(l)%res_a
+!             if (s /= 0) exit
+!         enddo
+!         l = l - 1
+!         close (un)
+!         allocate (idmatrix_2body(pl_id)%matrix(1:l))
+!         idmatrix_2body(pl_id)%matrix = matrix(1:l)
     end subroutine add_idmatrix_2body
 
 !----------------------------------------------------------------------------------------------
@@ -65,10 +125,13 @@ contains
 ! Loads id. matrices in RAM from files (2-body case)
 ! Produces:
 !   idmatrix_2body
-        integer pl_id
+        integer pl_id, s
 
         do pl_id = 1, 9
-            if (.not. allocated(idmatrix_2body(pl_id)%matrix)) &
+            s = get_idmatrix_2body_status(pl_id)
+            if (s > 0) &
+                call build_idmatrix_2body(planet_name(pl_id))
+            if (s /= 0) &
                 call add_idmatrix_2body(pl_id)
         enddo
     end subroutine init_idmatrix_2body

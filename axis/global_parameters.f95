@@ -85,7 +85,8 @@ contains
             i = 9
         case default
             i = 0
-            write (*, *) 'Warning! Detected incorrect planet name, be careful.'
+            write (*, *) 'Error! Planet name must be one from the list:'
+            write (*, *) 'MERCURY, VENUS, EARTHMOO, MARS, JUPITER, SATURN, URANUS, NEPTUNE, PLUTO'
         end select
         planet_id = i
     end function planet_id
@@ -120,28 +121,28 @@ contains
         case (9)
             s = 'PLUTO'
         case default
-            write (*, *) 'Warning! Detected incorrect planet id, be careful.'
+            write (*, *) "Error! The planet ID must be between 1 and 9."
         end select
     end function planet_name
 
 !----------------------------------------------------------------------------------------------
-    integer function nod(a, b)
+    integer function gcd(a, b)
 ! Find gcd - greatest common divisor
 ! Given:
 !   a,b - positive integer numbers
 ! Returns:
 !   <integer> - gcd
-        integer::a, b, c1, c2, c3, c4
+        integer:: a, b
+        integer:: a1, b1, r
 
-        c1 = a; c2 = b
-        do while (c1 /= c2)
-            c3 = c1
-            c4 = c2
-            c1 = min(c3, c4)
-            c2 = abs(c3 - c4)
+        a1 = a; b1 = b
+        do while (b1 /= 0)
+            r = mod(a1, b1)
+            a1 = b1
+            b1 = r
         enddo
-        nod = c1
-    end function nod
+        gcd = a1
+    end function gcd
 
 !----------------------------------------------------------------------------------------------
 end module global_parameters

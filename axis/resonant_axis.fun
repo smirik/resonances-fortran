@@ -44,7 +44,12 @@ test count_axis_2body_test
     a1=5.20248019d0
     m1=9.547919384243222d-4
     a=count_axis_2body(resonance,a1,m1)
-    assert_equal_within(,2.8253d0,1d-3)
+    assert_equal_within(a,2.8253d0,1d-2)
+! Kirkwood gap case test    
+    resonance=(/ 3, -1, 0, -2 /) 
+    a=count_axis_2body(resonance,a1,m1)
+    assert_equal_within(a,2.5020d0,1d-2)
+
 end test
 
 test count_axis_3body_test

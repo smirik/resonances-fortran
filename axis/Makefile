@@ -1,8 +1,8 @@
 comp= gfortran
 firstmodule= global_parameters
 
-module_sources= id_matrix.f95 \
-                resonant_axis.f95 \
+module_sources= resonant_axis.f95 \
+                id_matrix.f95 \
                 resonance_finder.f95
 
 module_objects = $(patsubst %.f95,%.o,$(module_sources))

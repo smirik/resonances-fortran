@@ -6,37 +6,6 @@ module resonant_axis
 contains
 
 !----------------------------------------------------------------------------------------------
-    subroutine make_id_matrix_2body(pl_name, max_order)
-! Creates id. matrix (twobody case)
-! Given:
-!   pl_name - planet name IN CAPITALS
-!   max_order - maximum resonance order
-! Produces:
-!   file with idmatrix_2body
-        integer:: pl_id, un, max_order
-        integer:: m1, m
-        character(8):: pl_name
-        character(14):: co = '(4i4,f23.16)'
-        integer, dimension(4):: resonance
-
-        pl_id = planet_id(pl_name)
-        un = 8 + pl_id
-        open (unit=un, file="id_matrix_"//trim(pl_name)//".dat", status='replace')
-        ! Get id. matrix for a planet by a given maximum order
-        do m1 = 1, max_order
-            do m = -1, -m1 - max_order, -1
-                ! Waste already observed cases
-                if (nod(abs(m), m1) /= 1) cycle
-                ! Look for main subresonance
-                resonance = (/m1, m, 0, -m1 - m/)
-                write (un, co) resonance, &
-                    count_axis_2body(resonance, a_pl(pl_id), m_pl(pl_id))
-            enddo
-        enddo
-        close (un)
-    end subroutine make_id_matrix_2body
-
-!----------------------------------------------------------------------------------------------
     real(8) function count_axis_2body(resonance, a1, m1)
 ! Find axis by resonance (Kepler et al.)
 ! Given:
