@@ -1,21 +1,31 @@
-f90comp = gfortran
-objects = resonant_axis.o main.o
+comp= gfortran
+firstmodule= global_parameters
 
-main: main.o resonant_axis.o
-	$(f90comp) -o axis $(objects)
+module_sources= resonant_axis.f90 \
+                id_matrix.f90 \
+                resonance_finder.f90
 
-resonant_axis.mod: resonant_axis.o resonant_axis.f90
-	$(f90comp) -c resonant_axis.f90
+module_objects = $(patsubst %.f90,%.o,$(module_sources))
+module_mods = $(patsubst %.f90,%.mod,$(module_sources))
 
-resonant_axis.o: resonant_axis.f90
-	$(f90comp) -c resonant_axis.f90
+main:  $(firstmodule).o $(module_objects) main.o
+	$(comp) -O2 $^ -o axis
 
-main.o: main.f90 resonant_axis.mod
-	$(f90comp) -c main.f90
+main.o: main.f90
+	$(comp) -O2 -c main.f90
 
+$(module_objects) $(module_mods): $(module_sources)# $(firstmodule).mod
+	for i in $^;do $(comp) -O2 -c $$i;echo "gfortran -O2 -c" $$i;done
+
+$(firstmodule).o $(firstmodule).mod: $(firstmodule).f90
+	$(comp) -O2 -c $^
+
+#Run tests after all object files created
 test:
+	funit global_parameters
 	funit resonant_axis
+	funit id_matrix
 
 clean:
-	rm -f *.o *.mod axis
+	rm -f *.o *.mod axis id_matrix_*
 	funit --clean
