@@ -68,7 +68,7 @@ contains
                 p1 = idmatrix_2body(pl_id)%matrix(i)%resonance(3)
                 p = idmatrix_2body(pl_id)%matrix(i)%resonance(4)
                 if (abs(res_a - a) <= eps) then
-                    write (as, *) pl_name, m1, m, p1, p, res_a, abs(res_a - a), eps
+                    write (as, *) pl_name, m1, m, p1, p, res_a!, abs(res_a - a), eps
                 endif
             enddo
         case (-1)
@@ -81,11 +81,11 @@ contains
                 p1 = idmatrix_2body(pl_id)%matrix(i)%resonance(3)
                 p = idmatrix_2body(pl_id)%matrix(i)%resonance(4)
                 if (abs(res_a - a) <= eps) then
-                    write (as, *) pl_name, m1, m, p1, p, res_a, abs(res_a - a), eps
+                    write (as, *) pl_name, m1, m, p1, p, res_a!, abs(res_a - a), eps
                 endif
             enddo
         case default
-            write (*, *) 'No founded idmatrix for ', pl_name, '!'
+            write (*, *) 'Idmatrix for ', pl_name, 'was not found!'
         end select
     end subroutine get_possible_resonances_2body
 

@@ -99,8 +99,8 @@ contains
             read (un, *) idmatrix_2body(pl_id)%matrix(i)
         enddo
         close (un)
-! TO DO - here is a weakness of the program with uncertainity of matrix length - need a cure
-!
+! TO DO - here was a weakness of the program with uncertainity of matrix length - need a cure
+! This code was commented and another solution used instead
 !         type(idmrow_2body), dimension(1000):: matrix
 !         un = 8 + pl_id
 !         l = 0

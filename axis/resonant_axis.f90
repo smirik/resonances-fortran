@@ -70,7 +70,7 @@ contains
 !   <real(8)> - mean motion
 
 !real(8), parameter :: k2 = k*k ! or 0.0002959122082855911025 ? Commented as non-used
-        real :: a, n
+        real(8) :: a, n
 
         n = dsqrt(gp_k*gp_k/(a*a*a))
         n_from_a = n

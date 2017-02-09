@@ -17,12 +17,12 @@ program resonant_axis_calculator
     write (*, *) 'Successfully done!'
 !---------------------------------------------
 
-! asteroid name, it's semimajor axis and delta (may be 0)
+! asteroid name
     call get_command_argument(1, asteroid)
-
+! it's orbit semimajor axis
     call get_command_argument(2, co)
     read (co, *) a
-
+! semi-interval delta (may be 0)
     call get_command_argument(3, co)
     read (co, *) delta
 !--------------------------------------------------------
@@ -31,7 +31,7 @@ program resonant_axis_calculator
     if (delta > 0d0) then
         call get_all_possible_resonances_2body(trim(asteroid), a, delta)
     else
-        write (*, *) 'No delta'
+        write (*, *) 'Delta was not specified and will be chosen by internal methods'
         call get_all_possible_resonances_2body(trim(asteroid), a)
     endif
 !--------------------------------------

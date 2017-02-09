@@ -19,19 +19,11 @@ end test
 test build_idmatrix_2body_test
     integer :: s
     integer :: max_order = 20
-    character(8):: pl_name'=JUPITER'
+    character(8):: pl_name='JUPITER'
     
     call build_idmatrix_2body(pl_name,max_order)
     open(unit=108,file='id_matrix_JUPITER.dat',action='read',iostat=s)
     assert_true(s==0)
 end test
 
-
 end test_suite
-
-! assert_true(expression)
-! assert_false(expression)
-! assert_equal(a, b)
-! assert_real_equal(a, b)
-! assert_equal_with(a, b, tol)
-! assert_array_equal(a,b
