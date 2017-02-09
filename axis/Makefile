@@ -20,8 +20,11 @@ $(module_objects) $(module_mods): $(module_sources)# $(firstmodule).mod
 $(firstmodule).o $(firstmodule).mod: $(firstmodule).f90
 	$(comp) -O2 -c $^
 
+#Run tests after all object files created
 test:
+	funit global_parameters
 	funit resonant_axis
+	funit id_matrix
 
 clean:
 	rm -f *.o *.mod axis id_matrix_*
