@@ -22,7 +22,7 @@ contains
         integer pl_id, as
 
         as = 100
-        open (unit=as, file=asteroid//'.rpin', status='replace')
+        open (unit=as, file=trim(pwd)//'wd/'//asteroid//'.rpin', status='replace')
         do pl_id = 1, 9
             if (present(delta)) then
                 eps = delta
@@ -68,7 +68,7 @@ contains
                 p1 = idmatrix_2body(pl_id)%matrix(i)%resonance(3)
                 p = idmatrix_2body(pl_id)%matrix(i)%resonance(4)
                 if (abs(res_a - a) <= eps) then
-                    write (as, *) pl_name, m1, m, p1, p, res_a!, abs(res_a - a), eps
+                    write (as, '(a8,3x,4i4,f23.16)') pl_name, m1, m, p1, p, res_a!, abs(res_a - a), eps
                 endif
             enddo
         case (-1)

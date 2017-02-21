@@ -1,5 +1,11 @@
+
+
 # Exec files
 axis/axis
+
+!/wd/
+/wd/*
+asteroids_format.csv
 
 # Ignore test compiled files
 axis/TestRunner*

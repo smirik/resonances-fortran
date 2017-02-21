@@ -1,29 +1,32 @@
 program compositor
 
-    use global_parameters
+    use global_parameters, n => bin_numrec
     use resonant_axis
     use id_matrix
     use resonance_finder
     use integrator
+    use librations
     implicit none
 
     character(25)::co, asteroid
     character(8):: pl_name
     integer:: pl_id,s
     real(8):: a
-    real(8):: delta=0d0
 
     integer:: lenarg
     type(orb_elem)::scr
     type(orb_elem_list)::elementlist
     type(arglist)::astlist
     character(25):: sample,s1,s2
-    integer:: i,n,i1,i2
+    integer:: i,i1,i2
 
 !----------------------------------------------------------------------------------------------
 ! At first we initialize id-matrices (2body case for now)
     write (*, *) 'Initiating idmatrix_2body...'
     call init_idmatrix_2body()
+    write (*, *) 'Successfully done!'
+    write (*, *) 'Initiating .aei planet data...'
+    call init_planet_data()
     write (*, *) 'Successfully done!'
 !----------------------------------------------------------------------------------------------
 ! Now we interpretate argument list
@@ -81,7 +84,6 @@ endif
 !----------------------------------------------------------------------------------------------
 ! Now try to find information about asteroids in a list
 open(unit=9,file='asteroids.bin',access='direct',recl=sizeof(scr),action='read')
-n=480482
 write(*,*) 'astlist',astlist%listlen
 astlist%current=>astlist%first
 elementlist%listlen=0
@@ -118,13 +120,19 @@ do i=1,elementlist%listlen
     elementlist%current=>elementlist%current%next
 enddo
 
-call execute_command_line('cd librations;'//&
-    "time ./lib `echo ../wd/*.rpin | sed 's/.rpin//g' | sed 's/...wd\///g'`",wait=.true.)
+!----------------------------------------------------------------------------------------------
+! Now performing global classification of resonances for asteroids in list
+call global_libration_processing_2body(elementlist)
+
+!call execute_command_line('cd librations/; echo $PWD;'//&
+!    "time ./lib2 `echo ../wd/*.rpin | sed 's/.rpin//g' | sed 's/...wd\///g'`",wait=.true.)
 
 
 
 !----------------------------------------------------------------------------------------------
-! Now deallocate lists
+! Now deallocate lists and others
+
+write (*, *) 'Clearing memory...'
 
 elementlist%current=>elementlist%first
 do i=1,elementlist%listlen
@@ -140,9 +148,8 @@ do i=1,astlist%listlen
     astlist%current=>astlist%first
 enddo
 
-!--------------------------------------
-    write (*, *) 'Clearing memory...'
     call clear_idmatrix_2body()
+    call clear_planet_data()
     write (*, *) 'Done. Ending program.'
 !--------------------------------------
 

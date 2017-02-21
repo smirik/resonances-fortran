@@ -1,63 +1,34 @@
 module integrator
 
-use global_parameters, only : pwd
+use global_parameters
 implicit none
 
-type orb_elem
-    character(25)::name
-    real(8),dimension(6)::elem
-end type orb_elem
-
-type orb_elem_leaf
-    type(orb_elem):: item
-    type(orb_elem_leaf),pointer:: next
-end type orb_elem_leaf
-
-type orb_elem_list
-    integer:: listlen
-    type(orb_elem_leaf),pointer:: first
-    type(orb_elem_leaf),pointer:: current
-end type orb_elem_list
-
-type argleaf
-    ! Argument list item
-    character(25)::name
-    type(argleaf),pointer::next
-end type argleaf
-
-type arglist
-    ! Argument list
-    integer:: listlen
-    type(argleaf),pointer::first
-    type(argleaf),pointer::current
-end type arglist
-
-
-integer:: kmax=1000
-
+!----------------------------------------------------------------------------------------------
 contains
 
+!----------------------------------------------------------------------------------------------
 integer function find_asteroid(sample,f2,nrec,st) result(flag)
-!# Find orbital elements for a given asteroid.
-!# Given:
-!#   i - <string> asteroid name
-!#   f2 - file object for the source file
-!#   nrec - number of records in the source file
-!#   stlen - record length of the source file (must be constant)
-!# Returns:
-!#   st - <list> the corresponding record to a given asteroid
-!#           (if no records found, returns None)
+! Find orbital elements for a given asteroid.
+! Given:
+!   sample - asteroid name
+!   f2 - file object for the source file
+!   nrec - number of records in the source file
+! Returns:
+!   <integer> - status (0 - if record is found, 1 - if record is not found)
+!   st - the corresponding special type orb_elem object for a given asteroid
+!       (if no records found, returns as was)
 integer f2,nrec
 character(25)::sample
 type(orb_elem):: st
 integer a,z,o
-!    write(*,*)'Seeking record about ',sample
+
+    write(*,*)'Seeking record about ',sample
     flag=1
     a=1; z=nrec
     read(9,rec=a) st
     if (st%name == sample) then
         write(*,*) 'Found record: '
-!        write(*,*) st
+        write(*,*) st
         write(*,*) 'at position ',a
         flag=0
         return
@@ -65,7 +36,7 @@ integer a,z,o
     read(9,rec=z) st
     if (st%name == sample) then
         write(*,*) 'Found record: '
-!        write(*,*) st
+        write(*,*) st
         write(*,*) 'at position ',z
         flag=0
         return
@@ -75,7 +46,7 @@ integer a,z,o
         read(9,rec=o) st
         if (st%name == sample) then
             write(*,*) 'Found record: '
-!            write(*,*) st
+            write(*,*) st
             write(*,*) 'at position ',o
             flag=0
             exit
@@ -91,8 +62,13 @@ integer a,z,o
     return
 end function find_asteroid
 
-
+!----------------------------------------------------------------------------------------------
 subroutine mercury_processing(element_list)
+! Performs integration of asteroids and creates .aei files if needed
+! Given:
+!   element_list - special type list (see above) of asteroids and their orbital elements
+! Produces:
+!   .aei files in "aeibase" directory
     integer i,j,s,block_counter,flag
     type(orb_elem_list):: element_list
 
@@ -116,7 +92,7 @@ subroutine mercury_processing(element_list)
                 element_list%current=>element_list%current%next
                 cycle c2
             endif
-            write(8,*) element_list%current%item%name,' ep=2457600.5d0'
+            write(8,*) element_list%current%item%name,' ep=',ep
             write(8,*) element_list%current%item%elem(1),element_list%current%item%elem(2),&
                        element_list%current%item%elem(3),element_list%current%item%elem(5),&
                        element_list%current%item%elem(4),element_list%current%item%elem(6),&
@@ -136,17 +112,5 @@ subroutine mercury_processing(element_list)
     write(*,*) '   .aei files created.'    
 end subroutine mercury_processing
 
-
+!----------------------------------------------------------------------------------------------
 end module integrator
-! open(unit=8,file='asteroids_format.csv',action='read')
-! open(unit=9,file='asteroids.bin',access='direct',recl=sizeof(scr),status='replace')
-! 
-! n=0
-! do
-!     read(8,*,iostat=s) scr
-!     if(s/=0) exit
-!     n=n+1
-!     write(9,rec=n) scr
-! enddo
-! close(8)
-! close(9)

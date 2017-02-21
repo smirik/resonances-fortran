@@ -23,7 +23,7 @@ contains
 
         pl_id = planet_id(pl_name)
         un = 8 + pl_id
-        open (unit=un, file="id_matrix_"//trim(pl_name)//".dat", status='replace')
+        open (unit=un, file=trim(pwd)//"axis/id_matrices_2body/id_matrix_"//trim(pl_name)//".dat", status='replace')
         if (present(max_order)) then
             m_o = max_order
         else
@@ -61,7 +61,8 @@ contains
         else
             un = 8 + pl_id
             pl_name = planet_name(pl_id)
-            open (unit=un, file='id_matrix_'//trim(pl_name)//'.dat', action='read', iostat=s)
+            open (unit=un, file=trim(pwd)//"axis/id_matrices_2body/id_matrix_"//trim(pl_name)//'.dat',&
+                action='read', iostat=s)
             if (s == 0) then
                 close (un)
                 s = -1
@@ -82,9 +83,11 @@ contains
 
         un = 8 + pl_id
         l = 0
-        open (unit=un, file='id_matrix_'//trim(planet_name(pl_id))//'.dat', action='read', iostat=s)
+        open (unit=un, file=trim(pwd)//"axis/id_matrices_2body/id_matrix_"//trim(planet_name(pl_id))//'.dat',&
+            action='read', iostat=s)
         if (s /= 0) then
-            write (*, *) 'Cannot add idmatrix for', planet_name(pl_id), 'from file - this file does not exist.'
+            write (*, *) 'Cannot add idmatrix for', planet_name(pl_id),&
+                'from file - this file does not exist.'
             return
         endif
         do
