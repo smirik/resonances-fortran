@@ -11,8 +11,8 @@ integer function find_asteroid(sample,f2,nrec,st) result(flag)
 ! Find orbital elements for a given asteroid.
 ! Given:
 !   sample - asteroid name
-!   f2 - file object for the source file
-!   nrec - number of records in the source file
+!   f2 - file object for the source file (asteroids.bin by default)
+!   nrec - number of records in the source file (480482 by this time)
 ! Returns:
 !   <integer> - status (0 - if record is found, 1 - if record is not found)
 !   st - the corresponding special type orb_elem object for a given asteroid

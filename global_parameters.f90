@@ -6,9 +6,17 @@ module global_parameters
     real(8), parameter:: twopi = pi*2
     real(8), parameter:: gp_k = 0.017202098795d0 ! or 1.720209895d−2 by IERS Conv. 2010
 
-! Parent directory ----------------------------------------------------------------------------
+! 13.03.2017
+! IMPORTANT PARAMETER: it is used for program version where we wanted to use only MERCURY integrator
+
+    integer,parameter:: use_only_integration = 1
+
+! Parent directory
     character(100), parameter::pwd="/home/ilya/Документы/resonances-fortran/"
 
+    
+    
+!----------------------------------------------------------------------------------------------
 ! Parameters for libration module -------------------------------------------------------------
     real(8), parameter:: circulation_parameter = 1d3
     real(8), parameter:: libration_parameter = 2d4
@@ -38,10 +46,11 @@ module global_parameters
 ! Used: http://ssd.jpl.nasa.gov/?planet_phys_par
 
     real(8), dimension(0:9)::res_a_std_delta = (/0d0, &
-                                                 1d-2, 1d-2, 1d-2, &
-                                                 1d-2, 1d-2, 1d-1, &
-                                                 2.5d-1, 4d-1, 1.4d0/)
-! Used variations in planet semimajor axis over 100000 years of integration
+                                                 1d-2, 2d-2, 3d-2, &
+                                                 5d-2, 1d-1, 2d-1, &
+                                                 5d-1, 5d-1, 2d0/)
+! Used variations in planet semimajor axis over 100000 years of integration.
+! I increased them twice because some resonances had not been found before that.
 
 !----------------------------------------------------------------------------------------------
 !----------------------------------------------------------------------------------------------

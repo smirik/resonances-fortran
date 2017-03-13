@@ -21,15 +21,8 @@ program compositor
     integer:: i,i1,i2
 
 !----------------------------------------------------------------------------------------------
-! At first we initialize id-matrices (2body case for now)
-    write (*, *) 'Initiating idmatrix_2body...'
-    call init_idmatrix_2body()
-    write (*, *) 'Successfully done!'
-    write (*, *) 'Initiating .aei planet data...'
-    call init_planet_data()
-    write (*, *) 'Successfully done!'
-!----------------------------------------------------------------------------------------------
-! Now we interpretate argument list
+! At first we interpretate argument list
+
 lenarg = command_argument_count()
 if (lenarg < 1) stop('Error! No arguments found. Please follow the format described in documentation')
 ! If only one asteroid in input
@@ -81,8 +74,10 @@ if (lenarg > 1) then
         astlist%listlen=lenarg
     end select
 endif
+
 !----------------------------------------------------------------------------------------------
-! Now try to find information about asteroids in a list
+! Now try to find orbital information about asteroids in a list
+
 open(unit=9,file='asteroids.bin',access='direct',recl=sizeof(scr),action='read')
 write(*,*) 'astlist',astlist%listlen
 astlist%current=>astlist%first
@@ -103,36 +98,57 @@ write(*,*) 'Total number of found asteroids: ',elementlist%listlen
 close(9)
 
 !----------------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------------------------
+
 ! Now performing an integration of asteroids in list
 call mercury_processing(elementlist)
+
 !----------------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------------------------
+
 ! Now find all possible resonances for asteroids in list
-elementlist%current=>elementlist%first
-do i=1,elementlist%listlen
-    if (delta > 0d0) then
-        call get_all_possible_resonances_2body(trim(elementlist%current%item%name),&
-            elementlist%current%item%elem(1), delta)
-    else
-        write (*,*) 'Delta was not specified and will be chosen by internal methods'
-        call get_all_possible_resonances_2body(trim(elementlist%current%item%name),&
-            elementlist%current%item%elem(1))
-    endif
-    elementlist%current=>elementlist%current%next
-enddo
+!----------------------------------------------------------------------------------------------
+! 13.03.2017 - disabled all functions but integration
+if (use_only_integration==0) then
+
+! Previously we initialize id-matrices (2body case for now)
+    write (*, *) 'Initiating idmatrix_2body...'
+    call init_idmatrix_2body()
+    write (*, *) 'Successfully done!'
+! And planet data (longitudes for building resonant phase
+    write (*, *) 'Initiating .aei planet data...'
+    call init_planet_data()
+    write (*, *) 'Successfully done!'
+!----------------------------------------------------------------------------------------------
+
+! Finally, finding resonances
+    elementlist%current=>elementlist%first
+    do i=1,elementlist%listlen
+        if (delta > 0d0) then
+            call get_all_possible_resonances_2body(trim(elementlist%current%item%name),&
+                elementlist%current%item%elem(1), delta)
+        else
+            write (*,*) 'Delta was not specified and will be chosen by internal methods'
+            call get_all_possible_resonances_2body(trim(elementlist%current%item%name),&
+                elementlist%current%item%elem(1))
+        endif
+        elementlist%current=>elementlist%current%next
+    enddo
 
 !----------------------------------------------------------------------------------------------
 ! Now performing global classification of resonances for asteroids in list
-call global_libration_processing_2body(elementlist)
-
-!call execute_command_line('cd librations/; echo $PWD;'//&
-!    "time ./lib2 `echo ../wd/*.rpin | sed 's/.rpin//g' | sed 's/...wd\///g'`",wait=.true.)
-
-
+    call global_libration_processing_2body(elementlist)
 
 !----------------------------------------------------------------------------------------------
 ! Now deallocate lists and others
 
-write (*, *) 'Clearing memory...'
+    write (*, *) 'Clearing memory...'
+    call clear_idmatrix_2body()
+    call clear_planet_data()
+
+endif
+
+write (*, *) 'Clearing argument lists...'
 
 elementlist%current=>elementlist%first
 do i=1,elementlist%listlen
@@ -147,11 +163,7 @@ do i=1,astlist%listlen
     deallocate(astlist%current)
     astlist%current=>astlist%first
 enddo
-
-    call clear_idmatrix_2body()
-    call clear_planet_data()
     write (*, *) 'Done. Ending program.'
 !--------------------------------------
-
 
 end
