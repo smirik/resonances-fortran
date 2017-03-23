@@ -17,10 +17,10 @@ integer function find_asteroid(sample,f2,nrec,st) result(flag)
 !   <integer> - status (0 - if record is found, 1 - if record is not found)
 !   st - the corresponding special type orb_elem object for a given asteroid
 !       (if no records found, returns as was)
-integer f2,nrec
-character(25)::sample
-type(orb_elem):: st
-integer a,z,o
+    integer f2,nrec
+    character(25)::sample
+    type(orb_elem):: st
+    integer a,z,o
 
     write(*,*)'Seeking record about ',sample
     flag=1
@@ -86,7 +86,7 @@ subroutine mercury_processing(element_list)
         c2: do i=j*kmax+1,min((j+1)*kmax,element_list%listlen)
             open(unit=110,file=trim(pwd)//'aeibase/'//trim(element_list%current%item%name)//'.aei',&
                 action='read',iostat=s)
-            if(s==0) then
+            if(s==0 .and. .not. force_aei_rebuilding) then
                 write(*,*) 'Asteroid ',element_list%current%item%name," doesn't need an integration"
                 close(110)
                 element_list%current=>element_list%current%next

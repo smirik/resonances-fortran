@@ -13,4 +13,5 @@ cd ../
 gfortran -O2 axis/*.o integrator/*.o librations/*.o compositor.f90 -o comp.x;
 mkdir -p wd
 mkdir -p aeibase
-mkdir -p axis/id_matrices_2body
+mkdir -p id_matrices
+#mkdir -p axis/id_matrices_2body

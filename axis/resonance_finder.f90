@@ -7,87 +7,129 @@ module resonance_finder
 contains
 
 !----------------------------------------------------------------------------------------------
-    subroutine get_all_possible_resonances_2body(asteroid, a, delta)
-! Finds possible resonances with any planets
-! for a given semimajor axis within a given interval (-delta;+delta)
-! Given:
-!   asteroid - asteroid name (e.g. 'example' )
-!   a - semimajor axis of an asteroid
-!   delta - semisize of interval
-! Produces:
-!   file with list of possible resonances
-        character(*)::asteroid
-        real(8)::a, eps
-        real(8), optional::delta
-        integer pl_id, as
+    subroutine get_all_possible_resonances(mode, asteroid, a, delta)
+    ! Finds possible resonances with any planets
+    ! for a given semimajor axis within a given interval (-delta;+delta).
+    ! If no delta specified, the internal values will be used instead.
+    ! Given:
+    !   mode - must be 2 or 3 (according to 2- or 3-body case)
+    !   asteroid - asteroid name (e.g. 'example' )
+    !   a - semimajor axis of an asteroid
+    !   delta - (OPTIONAL) semisize of interval
+    ! Produces:
+    !   file with the list of possible resonances
+        character(*):: asteroid
+        real(8):: a, eps
+        real(8), optional:: delta
+        integer:: pl_id, pl2_id, as, mode
 
         as = 100
-        open (unit=as, file=trim(pwd)//'wd/'//asteroid//'.rpin', status='replace')
+        if (mode == 3) then
+            open (unit=as, file=trim(pwd)//'wd/'//asteroid//'.rp3', status='replace')
+        elseif (mode == 2) then
+            open (unit=as, file=trim(pwd)//'wd/'//asteroid//'.rp2', status='replace')
+        else
+            write(*,*) 'Error! Wrong mode value (must be 2 or 3).'
+            return
+        endif
         do pl_id = 1, 9
-            if (present(delta)) then
-                eps = delta
-            else
+            if (.not. present(delta) .or. delta == 0d0) then
                 eps = res_a_std_delta(pl_id)
+            else
+                eps = delta
             endif
-            call get_possible_resonances_2body(as, a, pl_id, eps)
+            if( mode == 3) then
+                do pl2_id = pl_id + 1, 9
+                    call get_possible_resonances(as, a, eps, pl_id, pl2_id)
+                enddo
+            else
+                call get_possible_resonances(as, a, eps, pl_id)
+            endif
         enddo
         close (as)
-    end subroutine get_all_possible_resonances_2body
+    end subroutine get_all_possible_resonances
 
 !----------------------------------------------------------------------------------------------
-    subroutine get_possible_resonances_2body(as, a, pl_id, delta)
-! Finds possible resonances with a given planet
-! for a given semimajor axis within a given interval (-delta;+delta)
-! Given:
-!   as - unit descriptor for an asteroid file
-!   a - semimajor axis of an asteroid
-!   pl_id - planet ID
-!   delta - semisize of interval
-! Produces:
-!   file records in the following format:
-!      PLANET_NAME RESONANCE_NUMBERS RESONANT_AXIS
-        real(8):: a, res_a, eps
-        real(8), optional:: delta
-        integer:: i, s, m1, m, p1, p, pl_id
-        integer:: un, as
-        character(8) pl_name
+    subroutine get_possible_resonances(as, a, eps, pl_id, pl2_id)
+    ! Finds possible resonances with a given planet or two planets
+    ! for a given semimajor axis within a given interval (-eps;+eps)
+    ! Given:
+    !   as - unit descriptor for an asteroid file
+    !   a - semimajor axis of an asteroid
+    !   pl_id - planet ID
+    !   pl2_id - (OPTIONAL) second planet ID
+    !   eps - semisize of interval
+    ! Produces:
+    !   file records in the following format:
+    !      PLANET_NAME <PLANET2_NAME> RESONANCE_NUMBERS RESONANT_AXIS
+        real(8):: a, res_a
+        real(8):: eps
+        integer:: i, s, p, pl_id
+        integer, optional:: pl2_id
+        integer:: as
+        character(8) pl_name,pl2_name
+        logical:: case_3body
 
+        case_3body = present(pl2_id)
         pl_name = planet_name(pl_id)
-        if (present(delta)) then
-            eps = delta
+        if (case_3body) pl2_name = planet_name(pl2_id)
+        !write (*, *) 'Run over idmatrix for ', pl_name
+        !if(case_3body) write (*, *) '............ & ',pl2_name
+        if(case_3body) then
+            s = get_idmatrix_status(pl_id, pl2_id)
         else
-            eps = res_a_std_delta(pl_id)
+            s = get_idmatrix_status(pl_id)
         endif
-        write (*, *) 'Run over idmatrix for ', pl_name, '...'
-        select case (get_idmatrix_2body_status (pl_id))
+        select case (s)
         case (0)
-            do i = 1, size(idmatrix_2body(pl_id)%matrix)
-                res_a = idmatrix_2body(pl_id)%matrix(i)%res_a
-                m1 = idmatrix_2body(pl_id)%matrix(i)%resonance(1)
-                m = idmatrix_2body(pl_id)%matrix(i)%resonance(2)
-                p1 = idmatrix_2body(pl_id)%matrix(i)%resonance(3)
-                p = idmatrix_2body(pl_id)%matrix(i)%resonance(4)
-                if (abs(res_a - a) <= eps) then
-                    write (as, '(a8,3x,4i4,f23.16)') pl_name, m1, m, p1, p, res_a!, abs(res_a - a), eps
-                endif
-            enddo
+            if(case_3body) then
+                p = idm_index(pl_id, pl2_id)
+                do i = 1, size(idmatrix_3body(p)%matrix)
+                    res_a = idmatrix_3body(p)%matrix(i)%res_a
+                    if (abs(res_a - a) <= eps) then
+                        write (as, '(a8,3x,a8,3x,6i4,f23.16)') pl_name, pl2_name, &
+                            idmatrix_3body(p)%matrix(i)%resonance, res_a
+                    endif
+                enddo
+            else
+                do i = 1, size(idmatrix_2body(pl_id)%matrix)
+                    res_a = idmatrix_2body(pl_id)%matrix(i)%res_a
+                    if (abs(res_a - a) <= eps) then
+                        write (as, '(a8,3x,4i4,f23.16)') pl_name, &
+                        idmatrix_2body(pl_id)%matrix(i)%resonance, res_a
+                    endif
+                enddo
+            endif
         case (-1)
-            write (*, *) 'Cannot find idmatrix in memory - trying to find corresponding file...'
-            call add_idmatrix_2body(pl_id)
-            do i = 1, size(idmatrix_2body(pl_id)%matrix)
-                res_a = idmatrix_2body(pl_id)%matrix(i)%res_a
-                m1 = idmatrix_2body(pl_id)%matrix(i)%resonance(1)
-                m = idmatrix_2body(pl_id)%matrix(i)%resonance(2)
-                p1 = idmatrix_2body(pl_id)%matrix(i)%resonance(3)
-                p = idmatrix_2body(pl_id)%matrix(i)%resonance(4)
-                if (abs(res_a - a) <= eps) then
-                    write (as, *) pl_name, m1, m, p1, p, res_a!, abs(res_a - a), eps
-                endif
-            enddo
+            write (*, *) 'Cannot find idmatrix in memory - trying to find corresponding file.'
+            if(case_3body) then
+                call add_idmatrix(pl_id, pl2_id)
+                p = idm_index(pl_id, pl2_id)
+                do i = 1, size(idmatrix_3body(p)%matrix)
+                    res_a = idmatrix_3body(p)%matrix(i)%res_a
+                    if (abs(res_a - a) <= eps) then
+                        write (as, '(a8,3x,a8,3x,6i4,f23.16)') pl_name, pl2_name, &
+                            idmatrix_3body(p)%matrix(i)%resonance, res_a
+                    endif
+                enddo
+            else
+                call add_idmatrix(pl_id)
+                do i = 1, size(idmatrix_2body(pl_id)%matrix)
+                    res_a = idmatrix_2body(pl_id)%matrix(i)%res_a
+                    if (abs(res_a - a) <= eps) then
+                        write (as, '(a8,3x,4i4,f23.16)') pl_name, &
+                            idmatrix_2body(pl_id)%matrix(i)%resonance, res_a
+                    endif
+                enddo
+            endif
         case default
-            write (*, *) 'Idmatrix for ', pl_name, 'was not found!'
+            if(case_3body) then
+                write (*, *) 'Idmatrix for ', pl_name,' & ',pl2_name,' was not found!'
+            else
+                write (*, *) 'Idmatrix for ', pl_name,' was not found!'
+            endif
         end select
-    end subroutine get_possible_resonances_2body
+    end subroutine get_possible_resonances
 
 !----------------------------------------------------------------------------------------------
 end module resonance_finder

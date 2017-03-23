@@ -15,6 +15,7 @@ program compositor
 
     integer:: lenarg
     type(orb_elem)::scr
+    type(orb_elem),pointer::buffer
     type(orb_elem_list)::elementlist
     type(arglist)::astlist
     character(25):: sample,s1,s2
@@ -28,6 +29,7 @@ if (lenarg < 1) stop('Error! No arguments found. Please follow the format descri
 ! If only one asteroid in input
 if (lenarg == 1) then
     allocate(astlist%first)
+    astlist%first%next => null()
     astlist%current=>astlist%first
     call get_command_argument(1,astlist%current%name)
     astlist%listlen=1
@@ -38,11 +40,13 @@ if (lenarg > 1) then
     select case (trim(sample))
     case('-list')
             allocate(astlist%first)
+            astlist%first%next => null()
             astlist%current=>astlist%first
             call get_command_argument(2,astlist%first%name)
         do i=3,lenarg
             allocate(astlist%current%next)
             astlist%current=>astlist%current%next
+            astlist%current%next => null()
             call get_command_argument(i,astlist%current%name)
         enddo
         astlist%listlen=lenarg-1
@@ -53,22 +57,26 @@ if (lenarg > 1) then
         read(s2,*,iostat=s) i2
         if(s/=0) stop('Error! Wrong range arguments. Please follow the format described in documentation')
         allocate(astlist%first)
+        astlist%first%next => null()
         astlist%current=>astlist%first
         astlist%first%name=s1
         do i=i1+1,i2
             allocate(astlist%current%next)
             astlist%current=>astlist%current%next
+            astlist%current%next => null()
             write(sample,'(i25)') i
             astlist%current%name=trim(adjustl(sample))
         enddo
         astlist%listlen=max(0,i2-i1+1)
     case default
             allocate(astlist%first)
+            astlist%first%next => null()
             astlist%current=>astlist%first
             call get_command_argument(1,astlist%first%name)
         do i=2,lenarg
             allocate(astlist%current%next)
             astlist%current=>astlist%current%next
+            astlist%current%next => null()
             call get_command_argument(i,astlist%current%name)
         enddo
         astlist%listlen=lenarg
@@ -82,18 +90,21 @@ open(unit=9,file='asteroids.bin',access='direct',recl=sizeof(scr),action='read')
 write(*,*) 'astlist',astlist%listlen
 astlist%current=>astlist%first
 elementlist%listlen=0
-allocate(elementlist%current)
 do i=1,astlist%listlen
     if (find_asteroid(astlist%current%name,9,n,scr)==0) then
         elementlist%listlen=elementlist%listlen+1
-        if (elementlist%listlen==1) elementlist%first=>elementlist%current
+        if (elementlist%listlen==1) then
+            allocate(elementlist%current)
+            elementlist%first=>elementlist%current
+        else
+            allocate(elementlist%current%next)
+            elementlist%current=>elementlist%current%next
+        endif
         elementlist%current%item=scr
-        allocate(elementlist%current%next)
-        elementlist%current=>elementlist%current%next
+        elementlist%current%next=>null()
         astlist%current=>astlist%current%next
     endif
 enddo
-deallocate(elementlist%current)
 write(*,*) 'Total number of found asteroids: ',elementlist%listlen
 close(9)
 
@@ -108,13 +119,19 @@ call mercury_processing(elementlist)
 
 ! Now find all possible resonances for asteroids in list
 !----------------------------------------------------------------------------------------------
-! 13.03.2017 - disabled all functions but integration
-if (use_only_integration==0) then
+if (.not. use_only_integration) then
 
 ! Previously we initialize id-matrices (2body case for now)
-    write (*, *) 'Initiating idmatrix_2body...'
-    call init_idmatrix_2body()
-    write (*, *) 'Successfully done!'
+    if(mode_2body) then
+        write (*, *) 'Initiating idmatrix_2body...'
+        call init_idmatrix(2)
+        write (*, *) 'Successfully done!'
+    endif
+    if(mode_3body) then
+        write (*, *) 'Initiating idmatrix_3body...'
+        call init_idmatrix(3)
+        write (*, *) 'Successfully done!'
+    endif
 ! And planet data (longitudes for building resonant phase
     write (*, *) 'Initiating .aei planet data...'
     call init_planet_data()
@@ -122,33 +139,35 @@ if (use_only_integration==0) then
 !----------------------------------------------------------------------------------------------
 
 ! Finally, finding resonances
+    if (delta <= 0d0)&
+        write (*,*) 'Delta was not specified and will be chosen by internal methods'
+    if(.not. just_id_matrices) then
     elementlist%current=>elementlist%first
     do i=1,elementlist%listlen
-        if (delta > 0d0) then
-            call get_all_possible_resonances_2body(trim(elementlist%current%item%name),&
-                elementlist%current%item%elem(1), delta)
-        else
-            write (*,*) 'Delta was not specified and will be chosen by internal methods'
-            call get_all_possible_resonances_2body(trim(elementlist%current%item%name),&
-                elementlist%current%item%elem(1))
-        endif
+        if(mode_2body) call get_all_possible_resonances(2, &
+            trim(elementlist%current%item%name),&
+            elementlist%current%item%elem(1), delta)
+        if(mode_3body) call get_all_possible_resonances(3, &
+            trim(elementlist%current%item%name),&
+            elementlist%current%item%elem(1), delta)
         elementlist%current=>elementlist%current%next
     enddo
-
 !----------------------------------------------------------------------------------------------
 ! Now performing global classification of resonances for asteroids in list
-    call global_libration_processing_2body(elementlist)
-
+    if(mode_2body) call global_libration_processing(2, elementlist)
+    if(mode_3body) call global_libration_processing(3, elementlist)
+    endif
 !----------------------------------------------------------------------------------------------
 ! Now deallocate lists and others
 
     write (*, *) 'Clearing memory...'
-    call clear_idmatrix_2body()
+    if(mode_2body) call clear_idmatrix(2)
+    if(mode_3body) call clear_idmatrix(3)
     call clear_planet_data()
 
 endif
 
-write (*, *) 'Clearing argument lists...'
+write (*, *) 'Clearing element lists...'
 
 elementlist%current=>elementlist%first
 do i=1,elementlist%listlen
@@ -157,12 +176,23 @@ do i=1,elementlist%listlen
     elementlist%current=>elementlist%first
 enddo
 
+write (*, *) 'Clearing argument lists...'
+
 astlist%current=>astlist%first
 do i=1,astlist%listlen
     astlist%first=>astlist%current%next
     deallocate(astlist%current)
     astlist%current=>astlist%first
 enddo
+
+if(associated(astlist%current)) then
+    write(*, *) 'Some unallocated argument items still in the memory. Please check the source code.'
+    write(*,*) astlist%current%name
+endif
+if(associated(elementlist%current)) then
+    write(*, *) 'Some unallocated element items still in the memory. Please check the source code.'
+    write(*,*) elementlist%current%item
+endif
     write (*, *) 'Done. Ending program.'
 !--------------------------------------
 
