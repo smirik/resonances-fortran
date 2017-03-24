@@ -253,6 +253,13 @@ do i=1,astlist%listlen
 
     close(114)
     close(111)
+    if(allow_writing_metadata .and. dispose_metadata) &
+        call execute_command_line('cd '//trim(pwd)//'wd; rm -f '//&
+            trim(ast_name)//'.circ'//cmode//' '//&
+            trim(ast_name)//'.per'//cmode//' '//&
+            trim(ast_name)//'.rp'//cmode//' '//&
+            trim(ast_name)//'.phout'//cmode//' '//&
+            trim(ast_name)//'.smooth'//cmode, wait=.false.)
     astlist%current=>astlist%current%next
 enddo
 deallocate(ph,ctime,time,axis)
@@ -295,46 +302,6 @@ subroutine resph(res_num, pl_id, pl2_id)
         enddo
     endif
 end subroutine resph
-
-!----------------------------------------------------------------------------------------------
-function smoother(arg_array)
-! Do smoothing
-! (currently not used, but may be)
-! Given:
-!   arg_array - array to be smoothed
-! Returns:
-!   smoothed array of the same size
-    real(8),dimension(:):: arg_array
-    real(8),dimension(1:size(arg_array))::smoother
-    !real(8):: lambda
-    integer::i,lambda
-    !smoother(1)=arg_array(1)
-    do i=1,size(arg_array)
-        !lambda=min(1d1,dble(i))
-        lambda=max(i-0,1)
-        !smoother(i)=((lambda-1d0)*smoother(i-1)+arg_array(i))/lambda
-        smoother(i)=sum(arg_array(lambda:i))/dble(i+1-lambda)
-    enddo
-end function smoother
-
-!------------------------------------------------------------------------
-! Fast Fourier Transform
-! Do not try to check it. Really.
-! This is the most correct and precise code in the world. No jokes.
-subroutine fft(f,x)
-complex(8),dimension(0:n2-1)::x,xx
-integer i,j,m,k,v,ni,jm,f
-do m=1,ln
- do k=0,2**(ln-m)-1
-  do v=0,2**(m-1)-1
-   j=k*2**m+v;jm=2**(m-1)+j
-   i=k*2**(m-1)+v;ni=2**(ln-1)+i
-   xx(j)=x(i)+x(ni)
-   xx(jm)=(x(i)-x(ni))*exp(dcmplx(0d0,-2d0*pi*dble(k*f)/dble(2**(ln-m+1))))
-  enddo; enddo
- x(:)=xx(:); enddo
- if (f==-1) x=x/n2
-end subroutine fft
 
 !----------------------------------------------------------------------------------------------
 type(classifier_verdict) function new_classifier(res_num, pl_id, pl2_id) result(v)
@@ -445,27 +412,24 @@ v%slow_circulation_ratio=v%slow_circulation_time/(time(reclen)-time(1))
 
 end function new_classifier
 
-!----------------------------------------------------------------------------------------------
-integer function count_aei_file_records(f) result(plen)
-! Count number of records in .aei file (current standard is 10001)
-! Given:
-!   f - unit descriptor for .aei file
-! Returns:
-!   <integer> - number of records
-    integer f,j,s
-    
-    rewind(f)
-    plen=0
-    do j=1,aei_header
-        read(f,'(a)')! Pass header
-    enddo
-    do
-        read(f,*,iostat=s)
-        if(s/=0) exit
-        plen=plen+1
-    enddo
-    rewind(f)
-end function count_aei_file_records
+!------------------------------------------------------------------------
+! Fast Fourier Transform
+! Do not try to check it. Really.
+! This is the most correct and precise code in the world. No jokes.
+subroutine fft(f,x)
+complex(8),dimension(0:n2-1)::x,xx
+integer i,j,m,k,v,ni,jm,f
+do m=1,ln
+ do k=0,2**(ln-m)-1
+  do v=0,2**(m-1)-1
+   j=k*2**m+v;jm=2**(m-1)+j
+   i=k*2**(m-1)+v;ni=2**(ln-1)+i
+   xx(j)=x(i)+x(ni)
+   xx(jm)=(x(i)-x(ni))*exp(dcmplx(0d0,-2d0*pi*dble(k*f)/dble(2**(ln-m+1))))
+  enddo; enddo
+ x(:)=xx(:); enddo
+ if (f==-1) x=x/n2
+end subroutine fft
 
 !----------------------------------------------------------------------------------------------
 subroutine init_planet_data()
@@ -502,8 +466,52 @@ end subroutine init_planet_data
 
 !----------------------------------------------------------------------------------------------
 subroutine clear_planet_data()
+! Clears memory from loaded planet data
     deallocate(arg_m,arg_l)
 end subroutine clear_planet_data
+
+!----------------------------------------------------------------------------------------------
+integer function count_aei_file_records(f) result(plen)
+! Count number of records in .aei file (current standard is 10001)
+! Given:
+!   f - unit descriptor for .aei file
+! Returns:
+!   <integer> - number of records
+    integer f,j,s
+    
+    rewind(f)
+    plen=0
+    do j=1,aei_header
+        read(f,'(a)')! Pass header
+    enddo
+    do
+        read(f,*,iostat=s)
+        if(s/=0) exit
+        plen=plen+1
+    enddo
+    rewind(f)
+end function count_aei_file_records
+
+!----------------------------------------------------------------------------------------------
+function smoother(arg_array)
+! Do smoothing
+! (currently not used, but may be)
+! Given:
+!   arg_array - array to be smoothed
+! Returns:
+!   smoothed array of the same size
+    real(8),dimension(:):: arg_array
+    real(8),dimension(1:size(arg_array))::smoother
+    !real(8):: lambda
+    integer::i,lambda
+    !smoother(1)=arg_array(1)
+    do i=1,size(arg_array)
+        !lambda=min(1d1,dble(i))
+        lambda=max(i-0,1)
+        !smoother(i)=((lambda-1d0)*smoother(i-1)+arg_array(i))/lambda
+        smoother(i)=sum(arg_array(lambda:i))/dble(i+1-lambda)
+    enddo
+end function smoother
 
 !----------------------------------------------------------------------------------------------
 end module librations

@@ -21,6 +21,17 @@ program compositor
     character(25):: sample,s1,s2
     integer:: i,i1,i2
 
+if (just_id_matrices)
+    write (*, *) 'Initiating idmatrix_2body...'
+    call init_idmatrix(2)
+    write (*, *) 'Successfully done!'
+    write (*, *) 'Initiating idmatrix_3body...'
+    call init_idmatrix(3)
+    write (*, *) 'Successfully done!'
+    call clear_idmatrix(2)
+    call clear_idmatrix(3)
+    stop
+endif
 !----------------------------------------------------------------------------------------------
 ! At first we interpretate argument list
 

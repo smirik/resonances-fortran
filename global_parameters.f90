@@ -15,6 +15,7 @@ module global_parameters
     logical,parameter:: just_id_matrices = .false.
     logical,parameter:: allow_writing_metadata = .false.
     logical,parameter:: allow_plotting = allow_writing_metadata .and. .true.
+    logical,parameter:: dispose_metadata = .true.
     logical,parameter:: force_aei_rebuilding = .false.
     logical,parameter:: mode_2body=.true.
     logical,parameter:: mode_3body=.true.

@@ -14,7 +14,7 @@ $(module_objects) $(module_mods): $(module_sources)
 
 #Run tests after all object files created
 test:
-	funit global_parameters
+	echo 'tests in axis'
 	funit resonant_axis
 	funit id_matrix
 

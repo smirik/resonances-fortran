@@ -1,28 +1,18 @@
 test_suite id_matrix
 
-setup
-    ! Place code here that should run before each test
-end setup
-
-teardown
-    ! This code runs immediately after each test
-end teardown
-
-test get_idmatrix_2body_status_test
-    integer :: pl_id=5, p
-    integer :: status=-1
-    
-    p=get_idmatrix_2body_status(pl_id)
-    assert_true(p>=-1)
+test get_idmatrix_status_test
+    assert_true(get_idmatrix_status(5)>=-1)
+    assert_true(get_idmatrix_status(5,6)>=-1)
 end test
 
-test build_idmatrix_2body_test
-    integer :: s
-    integer :: max_order = 20
-    character(8):: pl_name='JUPITER'
-    
-    call build_idmatrix_2body(pl_name,max_order)
-    open(unit=108,file='id_matrix_JUPITER.dat',action='read',iostat=s)
+test build_idmatrix_test
+    integer:: s
+
+    call build_idmatrix('JUPITER ')
+    open(unit=108,file='../id_matrices/id_matrix_JUPITER.dat',action='read',iostat=s)
+    assert_true(s==0)
+    call build_idmatrix('JUPITER ','SATURN  ')
+    open(unit=108,file='../id_matrices/id_matrix_JUPITER_SATURN.dat',action='read',iostat=s)
     assert_true(s==0)
 end test
 
