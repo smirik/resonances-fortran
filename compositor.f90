@@ -21,7 +21,7 @@ program compositor
     character(25):: sample,s1,s2
     integer:: i,i1,i2
 
-if (just_id_matrices)
+if (just_id_matrices) then
     write (*, *) 'Initiating idmatrix_2body...'
     call init_idmatrix(2)
     write (*, *) 'Successfully done!'
