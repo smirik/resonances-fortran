@@ -32,14 +32,14 @@ contains
             write(*,*) 'Error! Wrong mode value (must be 2 or 3).'
             return
         endif
-        do pl_id = 1, 9
+        do pl_id = 1, 8!9
             if (.not. present(delta) .or. delta == 0d0) then
                 eps = res_a_std_delta(pl_id)
             else
                 eps = delta
             endif
             if( mode == 3) then
-                do pl2_id = pl_id + 1, 9
+                do pl2_id = pl_id + 1, 8!9
                     call get_possible_resonances(as, a, eps, pl_id, pl2_id)
                 enddo
             else

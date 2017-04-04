@@ -283,23 +283,16 @@ subroutine resph(res_num, pl_id, pl2_id)
     integer j,s
 
     if(present(pl2_id)) then
-        do j=1,reclen
-            ph(j)=(res_num(1)*(arg_m(pl_id,j)+arg_l(pl_id,j))+&
+        forall(j=1:reclen) &
+            ph(j)=norm_ang( (res_num(1)*(arg_m(pl_id,j)+arg_l(pl_id,j))+&
                 res_num(2)*(arg_m(pl2_id,j)+arg_l(pl2_id,j))+&
                 res_num(3)*(arg_m(10,j)+arg_l(10,j))+&
-                !res_num(4)*arg_l(pl_id,j)+&
-                !res_num(5)*arg_l(pl2_id,j)+&
-                res_num(6)*arg_l(10,j))*deg2pi
-            ph(j)=norm_ang(ph(j))
-        enddo
+                res_num(6)*arg_l(10,j))*deg2pi)
     else
-        do j=1,reclen
-            ph(j)=(res_num(1)*(arg_m(pl_id,j)+arg_l(pl_id,j))+&
+        forall(j=1:reclen) &
+            ph(j)=norm_ang((res_num(1)*(arg_m(pl_id,j)+arg_l(pl_id,j))+&
                 res_num(2)*(arg_m(10,j)+arg_l(10,j))+&
-                !res_num(3)*arg_l(pl_id,j)+&
-                res_num(4)*arg_l(10,j))*deg2pi
-            ph(j)=norm_ang(ph(j))
-        enddo
+                res_num(4)*arg_l(10,j))*deg2pi)
     endif
 end subroutine resph
 

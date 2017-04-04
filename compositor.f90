@@ -113,8 +113,8 @@ do i=1,astlist%listlen
         endif
         elementlist%current%item=scr
         elementlist%current%next=>null()
-        astlist%current=>astlist%current%next
     endif
+    astlist%current=>astlist%current%next
 enddo
 write(*,*) 'Total number of found asteroids: ',elementlist%listlen
 close(9)

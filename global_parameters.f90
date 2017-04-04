@@ -231,14 +231,15 @@ contains
     end function gcd
 
 !----------------------------------------------------------------------------------------------
-    real(8) function norm_ang(an)
+    pure function norm_ang(an)
     ! A function for adjusting the angle to (-PI;+PI)
     ! Given:
     !   an - angle in radians
     ! Returns:
     ! <real(8)> - normalized angle
-        real(8):: an
+        real(8),intent(in):: an
         real(8):: t,ds
+        real(8):: norm_ang 
 
         t=an;ds=dsign(1d0,an)
         do while(dabs(t)>pi)
