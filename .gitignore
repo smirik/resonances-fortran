@@ -37,3 +37,4 @@ axis/makeTestRunner
 *.exe
 *.out
 *.app
+*.x

@@ -36,7 +36,7 @@ endif
 ! At first we interpretate argument list
 
 lenarg = command_argument_count()
-if (lenarg < 1) stop('Error! No arguments found. Please follow the format described in documentation')
+if (lenarg < 1) stop ('Error! No arguments found. Please follow the format described in documentation')
 ! If only one asteroid in input
 if (lenarg == 1) then
     allocate(astlist%first)
@@ -66,7 +66,7 @@ if (lenarg > 1) then
         call get_command_argument(3,s2)
         read(s1,*,iostat=s) i1
         read(s2,*,iostat=s) i2
-        if(s/=0) stop('Error! Wrong range arguments. Please follow the format described in documentation')
+        if(s/=0) stop ('Error! Wrong range arguments. Please follow the format described in documentation')
         allocate(astlist%first)
         astlist%first%next => null()
         astlist%current=>astlist%first
