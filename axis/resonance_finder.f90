@@ -25,9 +25,9 @@ contains
 
         as = 100
         if (mode == 3) then
-            open (unit=as, file=trim(pwd)//'wd/'//asteroid//'.rp3', status='replace')
+            open (unit=as, file=trim(pwd)//'/wd/'//asteroid//'.rp3', status='replace')
         elseif (mode == 2) then
-            open (unit=as, file=trim(pwd)//'wd/'//asteroid//'.rp2', status='replace')
+            open (unit=as, file=trim(pwd)//'/wd/'//asteroid//'.rp2', status='replace')
         else
             write(*,*) 'Error! Wrong mode value (must be 2 or 3).'
             return

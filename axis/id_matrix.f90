@@ -34,7 +34,7 @@ contains
             max_order=gp_max_order_3body
             max_value=gp_max_value_3body
             allocate(resonance(1:6))
-            open (unit=un, file=trim(pwd)//"id_matrices/id_matrix_"&
+            open (unit=un, file=trim(pwd)//"/id_matrices/id_matrix_"&
             //trim(pl_name)//"_"//trim(pl2_name)//".dat", status='replace')
             n1=n_from_a(a_pl(pl_id))
             n2=n_from_a(a_pl(pl2_id))
@@ -45,7 +45,7 @@ contains
                         if (gcd(m1, gcd(abs(m2), abs(m))) /= 1 ) cycle
                         resonance = (/m1, m2, m, 0, 0, -m1 - m2 - m/)
                         write (un, co) resonance, &
-                            count_axis_3body(resonance,a_pl(pl_id),n1,0d0,n2,0d0)
+                            count_axis_3body(resonance,n1,0d0,n2,0d0)
                     enddo
                 enddo
                 do m2 = ceiling(-n1/n2*m1), max_value
@@ -55,7 +55,7 @@ contains
                         if (gcd(m1, gcd(abs(m2), abs(m))) /= 1 ) cycle
                         resonance = (/m1, m2, m, 0, 0, -m1 - m2 - m/)
                         write (un, co) resonance, &
-                            count_axis_3body(resonance,a_pl(pl_id),n1,0d0,n2,0d0)
+                            count_axis_3body(resonance,n1,0d0,n2,0d0)
                     enddo
                 enddo
             enddo
@@ -64,7 +64,7 @@ contains
             max_order=gp_max_order_2body
             max_value=gp_max_value_2body
             allocate(resonance(1:4))
-            open (unit=un, file=trim(pwd)//"id_matrices/id_matrix_"&
+            open (unit=un, file=trim(pwd)//"/id_matrices/id_matrix_"&
             //trim(pl_name)//".dat", status='replace')
             do m1 = 1, max_value
                 do m = -1, max(-max_value, -m1 - max_order), -1
@@ -105,7 +105,7 @@ contains
                 un = 8 + pl_id
                 pl_name = planet_name(pl_id)
                 pl2_name = planet_name(pl2_id)
-                open (unit=un, file=trim(pwd)//"id_matrices/id_matrix_"//&
+                open (unit=un, file=trim(pwd)//"/id_matrices/id_matrix_"//&
                     trim(pl_name)//"_"//trim(pl2_name)//'.dat',&
                     action='read', iostat=s)
                 if (s == 0) then
@@ -121,7 +121,7 @@ contains
             else
                 un = 8 + pl_id
                 pl_name = planet_name(pl_id)
-                open (unit=un, file=trim(pwd)//"id_matrices/id_matrix_"//&
+                open (unit=un, file=trim(pwd)//"/id_matrices/id_matrix_"//&
                     trim(pl_name)//'.dat',&
                     action='read', iostat=s)
                 if (s == 0) then
@@ -150,11 +150,11 @@ contains
         un = 8 + pl_id
         l = 0
         if(case_3body) then
-            open (unit=un, file=trim(pwd)//"id_matrices/id_matrix_"//&
+            open (unit=un, file=trim(pwd)//"/id_matrices/id_matrix_"//&
                 trim(planet_name(pl_id))//"_"//trim(planet_name(pl2_id))//'.dat',&
                 action='read', iostat=s)
         else
-            open (unit=un, file=trim(pwd)//"id_matrices/id_matrix_"//&
+            open (unit=un, file=trim(pwd)//"/id_matrices/id_matrix_"//&
                 trim(planet_name(pl_id))//'.dat', action='read', iostat=s)
         endif
         if (s /= 0) then

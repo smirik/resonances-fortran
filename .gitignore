@@ -1,8 +1,4 @@
 
-
-# Exec files
-axis/axis
-
 # Ignore test compiled files
 axis/TestRunner*
 axis/makeTestRunner
@@ -38,3 +34,17 @@ axis/makeTestRunner
 *.out
 *.app
 *.x
+
+# Metadata
+*.rp?
+*.rpout?
+*.per?
+*.phout?
+*.circ?
+*.smooth?
+*.png
+
+*.bin
+id_matrices/
+aeibase/
+aei_planet/

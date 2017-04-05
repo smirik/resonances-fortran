@@ -76,15 +76,17 @@ subroutine mercury_processing(element_list)
     element_list%current=>element_list%first
     block_counter=element_list%listlen / kmax
     do j=0,block_counter
-        open(unit=8,file=trim(pwd)//'mercury/small.in',status='replace')
+        open(unit=8,file=trim(pwd)//'/mercury/small.in',status='replace')
         write(8,'(a)') ')O+_06 Small-body initial data  (WARNING: Do not delete this line!!)'
         write(8,'(a)') ") Lines beginning with `)' are ignored."
         write(8,'(a)') ')---------------------------------------------------------------------'
         write(8,'(a)') 'style (Cartesian, Asteroidal, Cometary) = Asteroidal'
         write(8,'(a)') ')--------------------------------------------d or D is not matter--0d0 is possible too--'
         flag=0
+        open(unit=110,file=trim(pwd)//'/aei_planet/MERCURY.aei',action='read',iostat=flag)
+        close(110)
         c2: do i=j*kmax+1,min((j+1)*kmax,element_list%listlen)
-            open(unit=110,file=trim(pwd)//'aeibase/'//trim(element_list%current%item%name)//'.aei',&
+            open(unit=110,file=trim(pwd)//'/aeibase/'//trim(element_list%current%item%name)//'.aei',&
                 action='read',iostat=s)
             if(s==0 .and. .not. force_aei_rebuilding) then
                 write(*,*) 'Asteroid ',element_list%current%item%name," doesn't need an integration"
@@ -103,9 +105,15 @@ subroutine mercury_processing(element_list)
         close(8)
         if(flag>0) then
             write(*,*) 'Starting integration of a ',j,' block of asteroids'
-            call execute_command_line('cd '//trim(pwd)//'mercury; '// &
+            call execute_command_line('cd '//trim(pwd)//'/mercury; '// &
                 "time ./mercury6; time ./element6",wait=.true.)
-            call execute_command_line('cd '//trim(pwd)//'mercury; '// &
+            call execute_command_line('cd '//trim(pwd)//'/mercury; '// &
+                "mv MERCURY.aei ../aei_planet/; mv VENUS.aei ../aei_planet; "// &
+                "mv EARTHMOO.aei ../aei_planet/; mv MARS.aei ../aei_planet; "// &
+                "mv JUPITER.aei ../aei_planet/; mv SATURN.aei ../aei_planet; "// &
+                "mv URANUS.aei ../aei_planet/; mv NEPTUNE.aei ../aei_planet; "// &
+                "mv PLUTO.aei ../aei_planet/;",wait=.true.)
+            call execute_command_line('cd '//trim(pwd)//'/mercury; '// &
                 "mv *.aei ../aeibase/; mv info* ../ ; ./simple_clean.sh",wait=.true.)
         endif
     enddo

@@ -38,7 +38,7 @@ test count_axis_3body_test
     integer, dimension(6):: resonance = (/ 5, -2, -2, 0, 0, -1 /)
 
 ! Resonance value for 5J-2S-2
-    a = count_axis_3body(resonance, 5.204267d0, 0.00145024678779705d0, 5.65063905672262d-08, &
+    a = count_axis_3body(resonance, 0.00145024678779705d0, 5.65063905672262d-08, &
         0.000583991090866933d0, 3.74890765513312d-07)
     assert_equal_within(a, 3.17d0, 1d-2)
 end test

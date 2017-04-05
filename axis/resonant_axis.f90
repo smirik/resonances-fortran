@@ -22,7 +22,7 @@ contains
     end function count_axis_2body
 
 !----------------------------------------------------------------------------------------------
-    real(8) function count_axis_3body(resonance, a1, n1, l1, n2, l2)
+    real(8) function count_axis_3body(resonance, n1, l1, n2, l2)
     ! Find axis by resonance (Nesvorny 1998, Gallardo 2006)
     ! Given:
     !   resonance - array of integer (6 numbers: m1,m2,m,p1,p2,p)
@@ -31,8 +31,9 @@ contains
     !   l* - mean longitude
     ! Returns:
     !    <real(8)> - the corresponding semimajor axis for a given resonance
-        real(8):: a1, n1, l1, n2, l2, aa, na, la, eps
+        real(8):: n1, l1, n2, l2, aa, na, la, nj, eps
         integer, dimension(6):: resonance
+        real(8), parameter:: aj = 5.20248019d0
 
         na = (-resonance(1)*n1 - resonance(2)*n2 - resonance(4)*l1 - resonance(5)*l2) &
         /resonance(3)
@@ -40,9 +41,10 @@ contains
             count_axis_3body = -1d0
             return
         else
+            nj = n_from_a(aj)
             aa = (gp_k*gp_k/na/na)**(1d0/3d0) ! formula for s/a
-            eps = (a1 - aa)/a1
-            la = gp_k/(2d0*pi)*dsqrt(aa/a1)*(eps*eps)*n1
+            eps = (aj - aa)/aj
+            la = gp_k/(2d0*pi)*dsqrt(aa/aj)*(eps*eps)*nj
             na = (-resonance(1)*n1 - resonance(2)*n2 - resonance(4)*l1 - resonance(5)*l2 &
             - resonance(3)*la)/resonance(3)
             aa = (gp_k*gp_k/na/na)**(1d0/3d0) ! formula for s/a

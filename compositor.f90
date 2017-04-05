@@ -21,6 +21,11 @@ program compositor
     character(25):: sample,s1,s2
     integer:: i,i1,i2
 
+! Deriving a directory where program is running
+call getcwd(pwd,s)
+if(s>0) &
+    stop ('Error! Cannot get path to working directory. Maybe it is too long (>255 symbols).')
+! When we need only id_matrices, we do not need anything else
 if (just_id_matrices) then
     write (*, *) 'Initiating idmatrix_2body...'
     call init_idmatrix(2)
@@ -97,7 +102,7 @@ endif
 !----------------------------------------------------------------------------------------------
 ! Now try to find orbital information about asteroids in a list
 
-open(unit=9,file='asteroids.bin',access='direct',recl=sizeof(scr),action='read')
+open(unit=9,file=trim(pwd)//'/asteroids.bin',access='direct',recl=sizeof(scr),action='read')
 write(*,*) 'astlist',astlist%listlen
 astlist%current=>astlist%first
 elementlist%listlen=0

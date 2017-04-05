@@ -84,7 +84,7 @@ do i=1,astlist%listlen
     ast_rpin=trim(ast_name)//'.rp'//cmode
     ast_aei=trim(ast_name)//'.aei'
     write(*,*) "Phase building and classification for ",ast_name,'('//cmode//'-body case)'
-    open(unit=111,file=trim(pwd)//'wd/'//trim(ast_rpin),action='read',iostat=s)
+    open(unit=111,file=trim(pwd)//'/wd/'//trim(ast_rpin),action='read',iostat=s)
     ! If resonances cannot be read
     if (s /= 0) then
         write(*,*) 'Error! ',ast_rpin,' cannot be opened. This case will be passed.'
@@ -92,7 +92,7 @@ do i=1,astlist%listlen
         cycle
     endif
     ! Open .aei for asteroid
-    open(unit=110,file=trim(pwd)//'aeibase/'//trim(ast_aei),action='read',iostat=s)
+    open(unit=110,file=trim(pwd)//'/aeibase/'//trim(ast_aei),action='read',iostat=s)
     ! If .aei cannot be opened
     if (s /= 0) then
         write(*,*) 'Error! ',ast_aei,' cannot be opened. This asteroid will be passed.'
@@ -123,28 +123,28 @@ do i=1,astlist%listlen
     call fft(1,axis_per)
     max_axis_per=maxval(cdabs(axis_per(:)))**2/(reclen**2)
 
-    open(unit=114,file=trim(pwd)//'wd/'//trim(ast_name)//'.rpout'//cmode,status='replace')
+    open(unit=114,file=trim(pwd)//'/wd/'//trim(ast_name)//'.rpout'//cmode,status='replace')
     if(allow_writing_metadata) then
-        open(unit=112,file=trim(pwd)//'wd/'//trim(ast_name)//'.phout'//cmode,status='replace')
+        open(unit=112,file=trim(pwd)//'/wd/'//trim(ast_name)//'.phout'//cmode,status='replace')
         close(112)
-        open(unit=115,file=trim(pwd)//'wd/'//trim(ast_name)//'.smooth'//cmode,status='replace')
+        open(unit=115,file=trim(pwd)//'/wd/'//trim(ast_name)//'.smooth'//cmode,status='replace')
         close(115)
-        open(unit=116,file=trim(pwd)//'wd/'//trim(ast_name)//'.per'//cmode,status='replace')
+        open(unit=116,file=trim(pwd)//'/wd/'//trim(ast_name)//'.per'//cmode,status='replace')
         close(116)
-        open(unit=117,file=trim(pwd)//'wd/'//trim(ast_name)//'.circ'//cmode,status='replace')
+        open(unit=117,file=trim(pwd)//'/wd/'//trim(ast_name)//'.circ'//cmode,status='replace')
         close(117)
     endif
     ! Run over resonances list for asteroid
     cac=0
     runover: do
         if(allow_writing_metadata) then
-            open(unit=112,file=trim(pwd)//'wd/'//trim(ast_name)//'.phout'//cmode,&
+            open(unit=112,file=trim(pwd)//'/wd/'//trim(ast_name)//'.phout'//cmode,&
                 action='write',position='append')
-            open(unit=115,file=trim(pwd)//'wd/'//trim(ast_name)//'.smooth'//cmode,&
+            open(unit=115,file=trim(pwd)//'/wd/'//trim(ast_name)//'.smooth'//cmode,&
                 action='write',position='append')
-            open(unit=116,file=trim(pwd)//'wd/'//trim(ast_name)//'.per'//cmode,&
+            open(unit=116,file=trim(pwd)//'/wd/'//trim(ast_name)//'.per'//cmode,&
                 action='write',position='append')
-            open(unit=117,file=trim(pwd)//'wd/'//trim(ast_name)//'.circ'//cmode,&
+            open(unit=117,file=trim(pwd)//'/wd/'//trim(ast_name)//'.circ'//cmode,&
                 action='write',position='append')
         endif
         if(mode==3) then
@@ -225,8 +225,8 @@ do i=1,astlist%listlen
             close(117)
         endif
         if (allow_plotting) then
-            if((mode==3 .and. v3%verdict%verdict >=0) .or. &
-                (mode==2 .and. v2%verdict%verdict >=0)) then
+            if((.not. plot_all .and. ((mode==3 .and. v3%verdict%verdict>=0) .or. &
+                (mode==2 .and. v2%verdict%verdict>=0))) .or. plot_all) then
                 write(*,*) 'Got some interesting...'
                 write(res_index,'(i25)') cac
                 if(mode==3) then
@@ -239,7 +239,7 @@ do i=1,astlist%listlen
                 write(*,*) 'Plotting '//script_name//':'//res_index//&
                     ' diagram for '//trim(ast_name)
                 call execute_command_line('cd '//trim(pwd)//&
-                    'wd; gnuplot -e "name='//trim(ast_name)//&
+                    '/wd; gnuplot -e "name='//trim(ast_name)//&
                     ';i='//res_index//&
                     ';resonance=\"'//res_name//&
                     '\";ax_t='//axis_treshold//&
@@ -253,8 +253,8 @@ do i=1,astlist%listlen
 
     close(114)
     close(111)
-    if(allow_writing_metadata .and. dispose_metadata) &
-        call execute_command_line('cd '//trim(pwd)//'wd; rm -f '//&
+    if(dispose_metadata) &
+        call execute_command_line('cd '//trim(pwd)//'/wd; rm -f '//&
             trim(ast_name)//'.circ'//cmode//' '//&
             trim(ast_name)//'.per'//cmode//' '//&
             trim(ast_name)//'.rp'//cmode//' '//&
@@ -433,7 +433,7 @@ subroutine init_planet_data()
     allocate(arg_m(1:10,1:reclen),arg_l(1:10,1:reclen))
     do pl_id=1,9
         i=100+pl_id
-        open(unit=i,file=trim(pwd)//'aeibase/'//trim(planet_name(pl_id))//'.aei',&
+        open(unit=i,file=trim(pwd)//'/aei_planet/'//trim(planet_name(pl_id))//'.aei',&
         action='read',iostat=s)
         if (s/=0) then
             write(*,*) 'Error! ',planet_name(pl_id),'.aei cannot be opened.'

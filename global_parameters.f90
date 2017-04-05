@@ -15,13 +15,14 @@ module global_parameters
     logical,parameter:: just_id_matrices = .false.
     logical,parameter:: allow_writing_metadata = .false.
     logical,parameter:: allow_plotting = allow_writing_metadata .and. .true.
+    logical,parameter:: plot_all = allow_plotting .and. .false.
     logical,parameter:: dispose_metadata = .true.
     logical,parameter:: force_aei_rebuilding = .false.
     logical,parameter:: mode_2body=.true.
     logical,parameter:: mode_3body=.true.
 
-! Parent directory. It always must end with '/'.
-    character(100), parameter::pwd="/home/ilya/Документы/resonances-fortran/"
+! Parent directory. Determines automatically.
+    character(255):: pwd
 
 !----------------------------------------------------------------------------------------------
 ! Parameters for libration module -------------------------------------------------------------
@@ -33,7 +34,7 @@ module global_parameters
     real(8), parameter:: r2_treshold_2body = 2d3
     real(8), parameter:: sum_r2_treshold = 3d4
 ! Parameters for integrator module ------------------------------------------------------------
-    integer, parameter:: kmax = 1000
+    integer, parameter:: kmax = 100
     real(8), parameter:: ep = 2457600.5d0
     integer, parameter:: aei_numrec = 10001
 ! Parameters for id_matrices, resonance_finder etc. -------------------------------------------
