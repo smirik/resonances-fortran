@@ -30,9 +30,9 @@ module global_parameters
     real(8), parameter:: libration_parameter = 18400d0
     integer, parameter:: aei_header = 4
     integer, parameter:: bin_numrec = 480482
-    real(8), parameter:: r2_treshold_3body = 2.5d3
-    real(8), parameter:: r2_treshold_2body = 2d3
-    real(8), parameter:: sum_r2_treshold = 3d4
+    real(8), parameter:: r2_treshold_3body = pi/2.5d0
+    real(8), parameter:: r2_treshold_2body = pi/2.5d0
+    real(8), parameter:: sum_r2_treshold = 5d0
 ! Parameters for integrator module ------------------------------------------------------------
     integer, parameter:: kmax = 100
     real(8), parameter:: ep = 2457600.5d0

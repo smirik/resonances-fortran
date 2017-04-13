@@ -7,8 +7,8 @@ cp global_parameters.mod ../librations/;
 
 cd ../integrator ; gfortran -O2 -c integrator.f90;
 cp integrator.mod ../;
-cd ../librations ; gfortran -O2 -c librations.f90;
-cp librations.mod ../
+cd ../librations ; gfortran -O2 -c librations_support.f90; gfortran -O2 -c librations.f90;
+cp librations_support.mod ../; cp librations.mod ../;
 cd ../
 gfortran -O2 axis/*.o integrator/*.o librations/*.o compositor.f90 -o comp.x;
 mkdir -p aeibase
