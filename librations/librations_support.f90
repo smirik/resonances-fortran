@@ -12,6 +12,8 @@ contains
 
 !----------------------------------------------------------------------------------------------
 pure function mbessel0(t)
+! Modified Infeld function (u=0)
+! This function is used for creating smoothing filter
     real(8),intent(in):: t
     real(8) r
     integer k,i
@@ -32,6 +34,8 @@ end function mbessel0
 
 !----------------------------------------------------------------------------------------------
 subroutine get_filter(b,x0,m,filter)
+! Creates high-frequency filter by given parameters.
+! Used for applying to a data array and making array with smoothed values
     real(8) b,x0
     integer,intent(in):: m
     real(8),dimension(-m:m):: get_f

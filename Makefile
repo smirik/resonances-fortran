@@ -12,7 +12,7 @@ test:
 	cp global_parameters.f90 ./axis/
 	cp global_parameters.f90 ./librations/
 	cd ./axis ; make test ; rm -f global_parameters.f90
-	cd ./librations ; funit librations; rm -f global_parameters.f90
+	cd ./librations ; funit librations_support; rm -f global_parameters.f90
 	./clean.sh
 
 clean:

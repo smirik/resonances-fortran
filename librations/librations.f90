@@ -85,6 +85,7 @@ allocate(filter1(0:n2-1))
 
 call get_filter(1d1,0.024d0,80,filter1)!
 
+open(unit=1000,file=trim(pwd)//'/wd/current_result_'//cmode//'.txt',status='replace')
 astlist%current=>astlist%first
 ! Run over asteroid list
 do i=1,astlist%listlen
@@ -209,11 +210,17 @@ do i=1,astlist%listlen
             v3%verdict=new_classifier(res_num,pl_id,pl2_id)
             write(114,*) v3%verdict%verdict,v3%verdict%acknowledged,&
                 v3%pl_name,v3%pl2_name,v3%res_num
+            if(v3%verdict%verdict>=0) &
+                write(1000,*) ast_name,' ',v3%verdict%verdict,v3%verdict%acknowledged,&
+                v3%pl_name,v3%pl2_name,v3%res_num
         else
             v2%pl_name=pl_name
             v2%res_num=res_num
             v2%verdict=new_classifier(res_num,pl_id)
             write(114,*) v2%verdict%verdict,v2%verdict%acknowledged,&
+                v2%pl_name,v2%res_num
+            if(v2%verdict%verdict>=0) &
+                write(1000,*) ast_name,' ',v2%verdict%verdict,v2%verdict%acknowledged,&
                 v2%pl_name,v2%res_num
         endif
         if(allow_writing_metadata) then
@@ -293,6 +300,8 @@ do i=1,astlist%listlen
             trim(ast_name)//'.smooth'//cmode, wait=.false.)
     astlist%current=>astlist%current%next
 enddo
+
+close(1000)
 deallocate(ph,ph_comp,ph_f,ph_f_smooth,ph_comp_smooth)
 deallocate(axis,axis_f,axis_f_smooth,axis_smooth)
 deallocate(axis_per,axis_per_smooth,ph_per,ph_per_smooth)

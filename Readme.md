@@ -3,14 +3,11 @@ classifier, compositor etc.**
 
 -------------------------------------------------------------
 -------------------------------------------------------------
-    24.03.2017
+    17.04.2017
     This is a description of a program "Compositor".
     The purpose of the program is to find potential resonances for
     asteroids and identify them. Currently 2-body and 3-body cases are available
     for handling.
-    
-    Before launching the program be sure that you specified
-    the path for main directory as a variable "pwd" in "global_parameters.f90".
 
     There are some logical keys in "global_parameters.f90" that can be configured
     to make a special mode of running the program. Those keys are:
@@ -26,6 +23,9 @@ classifier, compositor etc.**
     
     "allow_plotting" - allow plotting graphics
     (works when creating metadata is allowed too)
+    
+    "plot_all" - if plotting is allowed, all graphics for all cases (even circulations)
+    will be drawn
     
     "dispose_metadata" - delete metadata after using
     (because it can take a lot of disk memory
@@ -51,7 +51,8 @@ classifier, compositor etc.**
     --> ./comp.x -range 1 1000
     
     When the program finishes, .aei files will be created and
-    placed in ./aeibase/ directory.
+    placed in ./aeibase/ directory, and .aei files for planets will appear in ./aei_planet/ .
+    
     Files with id_matrices will appear in ./id_matrices/ directory.
     Other files will be placed in ./wd/ directory.
     
@@ -59,10 +60,13 @@ classifier, compositor etc.**
     Each record includes:
     - Resonance (with planets and numbers)
     - Classification verdict (1 - pure resonance, 0 - transient, -1 - circulation)
-    - Additional data (circulation time and ratio, slow circulation/transient time and ratio)
+    - Status of acknowledged, based on cross Fourier analysis (1 - true, or 0 - false)
     
     .rp, .circ, .phout, .per, .smooth files are metadata
     .png files are graphics
+    
+    The common files "current_result_2.txt" and "current_result_3.txt" contain the information
+    about all found resonances over all given asteroid list in the same format.
 
     The command "make clean" frees the disk memory from temporary files
     (including metadata, object files etc).
