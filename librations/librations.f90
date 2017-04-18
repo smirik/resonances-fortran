@@ -297,6 +297,7 @@ do i=1,astlist%listlen
             trim(ast_name)//'.per'//cmode//' '//&
             trim(ast_name)//'.rp'//cmode//' '//&
             trim(ast_name)//'.phout'//cmode//' '//&
+            trim(ast_name)//'.rpout'//cmode//' '//&
             trim(ast_name)//'.smooth'//cmode, wait=.false.)
     astlist%current=>astlist%current%next
 enddo

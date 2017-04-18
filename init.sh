@@ -14,3 +14,4 @@ gfortran -O2 axis/*.o integrator/*.o librations/*.o compositor.f90 -o comp.x;
 mkdir -p aeibase
 mkdir -p aei_planet
 mkdir -p id_matrices
+mkdir -p wd
