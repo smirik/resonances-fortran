@@ -92,7 +92,7 @@ do
     endif
 
     m1=n2
-    if(m1==n2) exit
+    if(m1==m2) exit
 enddo
 
 do i=1,nt
