@@ -207,7 +207,7 @@ do i=1,astlist%listlen
             v3%pl_name=pl_name
             v3%pl2_name=pl2_name
             v3%res_num=res_num
-            v3%verdict=new_classifier(res_num,pl_id,pl2_id)
+            v3%verdict=new_classifier(res_num,astlist%current%item%elem(1),pl_id,pl2_id)
             write(114,*) v3%verdict%verdict,v3%verdict%acknowledged,&
                 v3%pl_name,v3%pl2_name,v3%res_num
             if(v3%verdict%verdict>=0) &
@@ -216,7 +216,7 @@ do i=1,astlist%listlen
         else
             v2%pl_name=pl_name
             v2%res_num=res_num
-            v2%verdict=new_classifier(res_num,pl_id)
+            v2%verdict=new_classifier(res_num,astlist%current%item%elem(1),pl_id)
             write(114,*) v2%verdict%verdict,v2%verdict%acknowledged,&
                 v2%pl_name,v2%res_num
             if(v2%verdict%verdict>=0) &
@@ -340,10 +340,11 @@ subroutine resph(res_num, pl_id, pl2_id)
 end subroutine resph
 
 !----------------------------------------------------------------------------------------------
-type(classifier_verdict) function new_classifier(res_num, pl_id, pl2_id) result(v)
+type(classifier_verdict) function new_classifier(res_num, a_ast, pl_id, pl2_id) result(v)
 ! Current version of libration classifier
 ! Given:
 !   res_num - resonance numbers
+!   a_ast - asteroid's cueernt value of semimajor axis
 !   pl_id - planet ID
 !   pl2_id - (OPTIONAL) second planet ID
 !   (IMPLICIT) - array of phase angles and it's periodogram
@@ -358,12 +359,13 @@ type(classifier_verdict) function new_classifier(res_num, pl_id, pl2_id) result(
 !       mean libration time (currently not used)
     integer,dimension(:):: res_num
     integer:: pl_id
+    real(8):: a_ast
     integer, optional:: pl2_id
     logical:: case_3body
-    real(8):: ttime,tlast
+    real(8):: ttime,tlast,mode_time
     real(8):: d,ds,dd,dds,r2,sum_r2,r2_t
     complex(8) z1,z2,z1s,z2s
-    integer k,klast,i
+    integer k,klast,i,mode_n
 
     case_3body=present(pl2_id)
     ! Initialization
@@ -388,6 +390,10 @@ type(classifier_verdict) function new_classifier(res_num, pl_id, pl2_id) result(
             planet_name(pl_id),res_num
     endif
 
+    mode_time=max(a_ast,a_pl(pl_id))
+    if(case_3body) mode_time=max(mode_time,a_pl(pl2_id))
+    mode_time=n_from_a(mode_time)/twopi/1d1
+    mode_n=max(1,min(n2-1,ceiling(n2*mode_time/1d-1)-1))
 ! Run over phase
 do k=2,reclen
     ttime=time(k)
@@ -463,7 +469,7 @@ enddo
         endif
     endif
     ! Status of acknowledged (by using cross-periogram and Shooster treshold)
-    if(maxval(cross_per(0:n2/5-1))>=dsqrt(axis_disp*ph_disp)/reclen*55.0d0) then
+    if(maxval(cross_per(0:mode_n))>=dsqrt(axis_disp*ph_disp)/reclen*55.0d0) then
         v%acknowledged = 1
     else
         v%acknowledged = 0

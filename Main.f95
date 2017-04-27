@@ -11,7 +11,8 @@ call get_command_argument(2,a2)
 read(a1,*) m1
 read(a2,*) m2
 ! Make clones
-nt=max(omp_get_num_procs()/2, 4)
+!nt=max(omp_get_num_procs()/2, 4)
+nt=omp_get_num_procs()
 call execute_command_line('mkdir -p ./result_bank ; mkdir -p ./aei_bank',wait=.false.)
 do i=1,nt
     write(dir,'(i1)') i
@@ -35,8 +36,8 @@ do
 !$OMP parallel
 !$OMP do private(i,dir,s1,s2,a1,a2,flag)
     do i=1,nt
-        s1=n1+(n2-n1+1)*(i-1)/4
-        s2=n1+(n2-n1+1)*i/4-1
+        s1=n1+(n2-n1+1)*(i-1)/nt
+        s2=n1+(n2-n1+1)*i/nt-1
         write(a1,'(i8)') s1
         write(a2,'(i8)') s2
         write(dir,'(i1)') i
@@ -66,7 +67,6 @@ do
 !$OMP end do nowait
 !$OMP end parallel
     else
-        s1=(n2-n1+1)/4
         write(a1,'(i8)') n1
         write(a2,'(i8)') n2
         

@@ -250,6 +250,18 @@ contains
     end function norm_ang    
 
 !----------------------------------------------------------------------------------------------
+    real(8) function n_from_a(a)
+    ! Get mean motion from semimajor axis
+    ! Given:
+    !   a - semimajor axis
+    ! Returns:
+    !   <real(8)> - mean motion
+        real(8):: a
+
+        n_from_a = dsqrt(gp_k*gp_k/(a*a*a))
+    end function n_from_a
+
+!----------------------------------------------------------------------------------------------
     integer function idm_index(pl_id,pl2_id)
     ! Support function for indexing 3-body id_matrices
     ! Given:
