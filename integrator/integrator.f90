@@ -106,7 +106,7 @@ subroutine mercury_processing(element_list)
         if(flag>0) then
             write(*,*) 'Starting integration of a ',j,' block of asteroids'
             call execute_command_line('cd '//trim(pwd)//'/mercury; '// &
-                "time ./mercury6; time ./element6",wait=.true.)
+                "./mercury6; ./element6",wait=.true.)
             call execute_command_line('cd '//trim(pwd)//'/mercury; '// &
                 "mv MERCURY.aei ../aei_planet/; mv VENUS.aei ../aei_planet; "// &
                 "mv EARTHMOO.aei ../aei_planet/; mv MARS.aei ../aei_planet; "// &
