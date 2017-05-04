@@ -2,7 +2,7 @@ program main
 implicit none
 
 integer:: omp_get_num_procs
-integer i,f,flag,nt
+integer i,f,flag,nt,bl
 character(30):: a1,a2
 character(10):: dir
 integer s1,s2,n1,n2,m1,m2
@@ -28,10 +28,12 @@ do i=1,nt
     if(f>1) stop ('Error! One clone failed to appear. Please check something.')
 enddo
 
-!Launch the program with blocks of 1000 asteroids
+!Launch the program with blocks of "bl" asteroids
+i=1000/100/nt+1
+bl=100*nt*i-1
 do 
 
-    n1=m1;n2=min(m1+999,m2)
+    n1=m1;n2=min(m1+bl,m2)
     if (n2-n1+1>=100) then
 !$OMP parallel
 !$OMP do private(i,dir,s1,s2,a1,a2,flag)
