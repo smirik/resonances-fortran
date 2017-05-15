@@ -29,9 +29,9 @@ do i=1,nt
 enddo
 
 !Launch the program with blocks of "bl" asteroids
-i=1000/100/nt+1
+i=999/100/nt+1
 bl=100*nt*i-1
-do 
+do
 
     n1=m1;n2=min(m1+bl,m2)
     if (n2-n1+1>=100) then
@@ -93,8 +93,8 @@ do
         close(501)
     endif
 
-    m1=n2
-    if(m1==m2) exit
+    m1=n2+1
+    if(m1>m2) exit
 enddo
 
 do i=1,nt
