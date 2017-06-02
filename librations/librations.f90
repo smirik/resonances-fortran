@@ -2,6 +2,7 @@ module librations
 
 use global_parameters, reclen => aei_numrec
 use librations_support
+use resonance_finder
 implicit none
 
 ! Work arrays ---------------------------------------------------------------------------------
@@ -12,7 +13,7 @@ integer,dimension(:),allocatable:: res_num
 complex(8),dimension(:),allocatable:: ph_comp,ph_f,ph_f_smooth,ph_comp_smooth
 complex(8),dimension(:),allocatable:: axis_f,axis_f_smooth,axis_smooth
 real(8),dimension(:),allocatable:: ph_per,axis_per,cross_per,ph_per_smooth,axis_per_smooth
-real(8):: axis_disp, ph_disp! Std deviations (estimated)
+real(8):: axis_disp, axis_smooth_disp, ph_disp! Std deviations (estimated)
 !----------------------------------------------------------------------------------------------
 ! Special types for classificator
 type classifier_verdict
@@ -25,6 +26,7 @@ type classifier_verdict
     real(8):: libration_time
     real(8):: libration_ratio
     real(8):: mean_libration_time
+    real(8):: mode_time
 end type classifier_verdict
 
 type cl_2body
@@ -53,12 +55,12 @@ subroutine global_libration_processing(mode, astlist)
 !   files of classified resonances for each asteroid
 !   (some keys in global parameters allow also create metadata and draw graphics)
 type(orb_elem_list):: astlist
-integer:: s, pl_id, pl2_id, i, j, cac, mode
+integer:: s, pl_id, pl2_id, i, j, cac, mode, problem_status
 character(30):: ast_rpin,ast_aei,ast_name,res_index,axis_treshold,cross_treshold,ph_treshold
 character(52):: res_name
 character(8):: pl_name, pl2_name, script_name
 character(1):: cmode
-real(8):: max_ph_per, max_axis_per, mean_axis
+real(8):: max_ph_per, max_axis_per, mean_axis, mean_axis_smooth
 complex(8):: avg
 complex(8),dimension(:),allocatable:: filter1
 
@@ -89,17 +91,12 @@ open(unit=1000,file=trim(pwd)//'/wd/current_result_'//cmode//'.txt',status='repl
 astlist%current=>astlist%first
 ! Run over asteroid list
 do i=1,astlist%listlen
+    problem_status = 0
     ast_name=astlist%current%item%name
     ast_rpin=trim(ast_name)//'.rp'//cmode
     ast_aei=trim(ast_name)//'.aei'
+
     write(*,*) "Phase building and classification for ",ast_name,'('//cmode//'-body case)'
-    open(unit=111,file=trim(pwd)//'/wd/'//trim(ast_rpin),action='read',iostat=s)
-    ! If resonances cannot be read
-    if (s /= 0) then
-        write(*,*) 'Error! ',ast_rpin,' cannot be opened. This case will be passed.'
-        astlist%current=>astlist%current%next
-        cycle
-    endif
     ! Open .aei for asteroid
     open(unit=110,file=trim(pwd)//'/aeibase/'//trim(ast_aei),action='read',iostat=s)
     ! If .aei cannot be opened
@@ -111,6 +108,7 @@ do i=1,astlist%listlen
     ! If .aei has another number of records, it will still work
     if (count_aei_file_records(110) /= reclen) then
         write(*,*) 'Warning! Unexpectedly different file length of ',ast_aei
+        problem_status = 10*problem_status+2
     endif
     ! Pass header
     do j=1,aei_header
@@ -121,7 +119,7 @@ do i=1,astlist%listlen
         read(110,*,iostat=s) time(j),arg_l(10,j),arg_m(10,j),axis(j)
     enddo
     close(110)
-    
+
     ! Centering axis oscillations
     mean_axis=sum(axis(:)/reclen)
     axis=axis-mean_axis
@@ -136,7 +134,36 @@ do i=1,astlist%listlen
     axis_smooth(:)=axis_f_smooth(:)
     call fft(-1,axis_smooth)
     axis_disp= sum((axis(1:reclen)-dreal(axis_smooth(0:reclen-1)))**2)/dble(reclen-1)
-    write(axis_treshold,'(f30.16)') axis_disp*13.11d0/reclen!
+    write(axis_treshold,'(f30.16)') axis_disp*13.11d0/reclen
+    mean_axis_smooth = sum(dreal(axis_smooth(0:reclen-1))/reclen)
+    axis_smooth_disp = sum((dreal(axis_smooth(0:reclen-1))-mean_axis_smooth)**2)/dble(reclen-1)
+    if (axis_smooth_disp/sum(axis(1:reclen)**2*dble(reclen-1)) > 1d-2) then
+        problem_status = problem_status*10+1
+        write(*,*) 'Warning! Asteroid ',ast_name,' semiaxis has too large perturbations'
+    endif
+    if (axis_smooth_disp/(mean_axis_smooth+mean_axis) > 1d-1) then
+        problem_status = problem_status*10+3
+        write(*,*) 'Warning! Asteroid ',ast_name,' semiaxis is not stable and proper value might be bad'
+        write(*,*)  mean_axis_smooth+mean_axis, axis_smooth_disp
+    endif
+    if (problem_status <= 1) then
+        mean_axis_smooth = mean_axis_smooth+mean_axis
+    else
+        mean_axis_smooth = sum(axis(1:reclen/10)/(reclen/10)) + mean_axis
+    endif
+
+    ! Finding resonances
+    write(*,*) "Finding resonances for ",ast_name,'('//cmode//'-body case)'
+    call get_all_possible_resonances(mode,trim(ast_name),mean_axis_smooth,delta)
+
+    ! Try to read founded resonances
+    open(unit=111,file=trim(pwd)//'/wd/'//trim(ast_rpin),action='read',iostat=s)
+    ! If resonances cannot be read
+    if (s /= 0) then
+        write(*,*) 'Error! ',ast_rpin,' cannot be opened. This case will be passed.'
+        astlist%current=>astlist%current%next
+        cycle
+    endif
 
     open(unit=114,file=trim(pwd)//'/wd/'//trim(ast_name)//'.rpout'//cmode,status='replace')
     if(allow_writing_metadata) then
@@ -208,20 +235,20 @@ do i=1,astlist%listlen
             v3%pl2_name=pl2_name
             v3%res_num=res_num
             v3%verdict=new_classifier(res_num,astlist%current%item%elem(1),pl_id,pl2_id)
-            write(114,*) v3%verdict%verdict,v3%verdict%acknowledged,&
-                v3%pl_name,v3%pl2_name,v3%res_num
+            write(114,*) problem_status,v3%verdict%verdict,v3%verdict%acknowledged,&
+                v3%pl_name,v3%pl2_name,v3%res_num,v3%verdict%mode_time
             if(v3%verdict%verdict>=0) &
-                write(1000,*) ast_name,' ',v3%verdict%verdict,v3%verdict%acknowledged,&
-                v3%pl_name,v3%pl2_name,v3%res_num
+                write(1000,*) ast_name,' ',problem_status,v3%verdict%verdict,v3%verdict%acknowledged,&
+                v3%pl_name,v3%pl2_name,v3%res_num,v3%verdict%mode_time
         else
             v2%pl_name=pl_name
             v2%res_num=res_num
             v2%verdict=new_classifier(res_num,astlist%current%item%elem(1),pl_id)
-            write(114,*) v2%verdict%verdict,v2%verdict%acknowledged,&
-                v2%pl_name,v2%res_num
+            write(114,*) problem_status,v2%verdict%verdict,v2%verdict%acknowledged,&
+                v2%pl_name,v2%res_num,v2%verdict%mode_time
             if(v2%verdict%verdict>=0) &
-                write(1000,*) ast_name,' ',v2%verdict%verdict,v2%verdict%acknowledged,&
-                v2%pl_name,v2%res_num
+                write(1000,*) ast_name,' ',problem_status,v2%verdict%verdict,v2%verdict%acknowledged,&
+                v2%pl_name,v2%res_num,v2%verdict%mode_time
         endif
         if(allow_writing_metadata) then
             ! Current data rows
@@ -392,7 +419,7 @@ type(classifier_verdict) function new_classifier(res_num, a_ast, pl_id, pl2_id) 
 
     mode_time=max(a_ast,a_pl(pl_id))
     if(case_3body) mode_time=max(mode_time,a_pl(pl2_id))
-    mode_time=n_from_a(mode_time)/twopi/1d1
+    mode_time=n_from_a(mode_time)/twopi*365.25d0/5d0
     mode_n=max(1,min(n2-1,ceiling(n2*mode_time/1d-1)-1))
 ! Run over phase
 do k=2,reclen
@@ -476,6 +503,7 @@ enddo
     endif
     v%circulation_ratio=v%circulation_time/(time(reclen)-time(1))
     v%libration_ratio=v%libration_time/(time(reclen)-time(1))
+    v%mode_time = 1d0/mode_time
 end function new_classifier
 
 !----------------------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ module global_parameters
 ! like do only integration or forbid metadata outputting or chose between
 ! calculating 2-body or 3-body resonances or even both of them
 
-    logical,parameter:: use_only_integration = .true.
+    logical,parameter:: use_only_integration = .false.
     logical,parameter:: just_id_matrices = .false.
     logical,parameter:: allow_writing_metadata = .false.
     logical,parameter:: allow_plotting = allow_writing_metadata .and. .true.

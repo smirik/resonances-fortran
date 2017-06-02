@@ -33,7 +33,7 @@ contains
     !    <real(8)> - the corresponding semimajor axis for a given resonance
         real(8):: n1, l1, n2, l2, aa, na, la, nj, eps
         integer, dimension(6):: resonance
-        real(8), parameter:: aj = 5.20248019d0
+        real(8):: aj, mj
         integer:: i
 
         na = (-resonance(1)*n1 - resonance(2)*n2 - resonance(4)*l1 - resonance(5)*l2) &
@@ -42,15 +42,17 @@ contains
             count_axis_3body = -1d0
             return
         else
-        !    la = 0d0 ! Here is a pattern for overpassing by planets
-        !    do i = 1, 8 ! (still needed a second expression)
-        !        aj = a_pl(i)
-                nj = n_from_a(aj)
+            la = 0d0 ! Here is a pattern for overpassing by planets
+            do i = 1, 8 ! (still needed a second expression)
+                aj = a_pl(i)
+                mj = m_pl(i)
                 aa = (gp_k*gp_k/na/na)**(1d0/3d0) ! formula for s/a
-                eps = (aj - aa)/aj
-        !    la = max(la, gp_k/(2d0*pi)*dsqrt(aa/aj)*(eps*eps)*nj)
-        !    enddo
-            la = gp_k/(2d0*pi)*dsqrt(aa/aj)*(eps*eps)*nj
+                if (aa>=aj) then
+                    la = la + (3d0*pi/2d0*mj/(1d0+mj)**1.5d0*(aj**2/aa**3.5d0))/365.25d0
+                else
+                    la = la + (3d0*pi/2d0*mj*(dsqrt(aa)/aj)**3)/365.25d0
+                endif
+            enddo
             na = (-resonance(1)*n1 - resonance(2)*n2 - resonance(4)*l1 - resonance(5)*l2 &
             - resonance(6)*la)/resonance(3)
             aa = (gp_k*gp_k/na/na)**(1d0/3d0) ! formula for s/a

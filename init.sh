@@ -1,7 +1,7 @@
 #!/bin/bash
 cd mercury ; ./compile.sh;
 cd ../axis ; make;
-cp *.mod ../;
+cp *.mod ../; cp *.mod ../librations/
 cp global_parameters.mod ../integrator/;
 cp global_parameters.mod ../librations/;
 

@@ -12,7 +12,7 @@ read(a1,*) m1
 read(a2,*) m2
 ! Make clones
 !nt=max(omp_get_num_procs()/2, 4)
-nt=omp_get_num_procs()
+nt=min(omp_get_num_procs(),(m2-m1+1)/100+1)
 call execute_command_line('mkdir -p ./result_bank ; mkdir -p ./aei_bank',wait=.false.)
 do i=1,nt
     write(dir,'(i1)') i

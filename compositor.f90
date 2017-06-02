@@ -3,7 +3,6 @@ program compositor
     use global_parameters, n => bin_numrec
     use resonant_axis
     use id_matrix
-    use resonance_finder
     use integrator
     use librations
     implicit none
@@ -154,24 +153,12 @@ if (.not. use_only_integration) then
     write (*, *) 'Successfully done!'
 !----------------------------------------------------------------------------------------------
 
-! Finally, finding resonances
-    if (delta <= 0d0)&
-        write (*,*) 'Delta was not specified and will be chosen by internal methods'
-    if(.not. just_id_matrices) then
-    elementlist%current=>elementlist%first
-    do i=1,elementlist%listlen
-        if(mode_2body) call get_all_possible_resonances(2, &
-            trim(elementlist%current%item%name),&
-            elementlist%current%item%elem(1), delta)
-        if(mode_3body) call get_all_possible_resonances(3, &
-            trim(elementlist%current%item%name),&
-            elementlist%current%item%elem(1), delta)
-        elementlist%current=>elementlist%current%next
-    enddo
-!----------------------------------------------------------------------------------------------
 ! Now performing global classification of resonances for asteroids in list
-    if(mode_2body) call global_libration_processing(2, elementlist)
-    if(mode_3body) call global_libration_processing(3, elementlist)
+    if(.not. just_id_matrices) then
+        if (delta <= 0d0)&
+            write (*,*) 'Delta was not specified and will be chosen by internal methods'
+        if(mode_2body) call global_libration_processing(2, elementlist)
+        if(mode_3body) call global_libration_processing(3, elementlist)
     endif
 !----------------------------------------------------------------------------------------------
 ! Now deallocate lists and others
