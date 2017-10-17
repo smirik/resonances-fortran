@@ -1,13 +1,21 @@
 DIRS = axis
 
 res:
-	for d in $(DIRS); do (cd $$d; $(MAKE) ); done
+	./init.sh
+#	for d in $(DIRS); do (cd $$d; $(MAKE) ); done
 
 prettify:
-	find . -name "*.f95"|xargs fprettify -i 4
+	find . -name "*.f90"|xargs fprettify -i 4
 
 test:
-	for d in $(DIRS); do (cd $$d; $(MAKE) test ); done
+	funit global_parameters
+	cp global_parameters.f90 ./axis/
+	cp global_parameters.f90 ./librations/
+	cd ./axis ; make test ; rm -f global_parameters.f90
+	cd ./librations ; funit librations_support; rm -f global_parameters.f90
+	./clean.sh
 
 clean:
-	for d in $(DIRS); do (cd $$d; $(MAKE) clean ); done
+	./clean.sh
+	funit --clean
+#	for d in $(DIRS); do (cd $$d; $(MAKE) clean ); done
