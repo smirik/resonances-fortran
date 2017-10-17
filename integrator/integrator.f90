@@ -88,6 +88,8 @@ subroutine mercury_processing(element_list)
         c2: do i=j*kmax+1,min((j+1)*kmax,element_list%listlen)
             open(unit=110,file=trim(pwd)//'/aeibase/'//trim(element_list%current%item%name)//'.aei',&
                 action='read',iostat=s)
+            if (s/=0) open(unit=110,file=trim(pwd)//'/aei_bank/'//trim(element_list%current%item%name)//&
+            '.aei', action='read',iostat=s)
             if(s==0 .and. .not. force_aei_rebuilding) then
                 write(*,*) 'Asteroid ',element_list%current%item%name," doesn't need an integration"
                 close(110)

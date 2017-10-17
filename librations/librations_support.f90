@@ -53,7 +53,7 @@ subroutine get_filter(b,x0,m,filter)
     call fft(1,filter)
 end subroutine get_filter
 
-!------------------------------------------------------------------------
+!----------------------------------------------------------------------------------------------
 ! Fast Fourier Transform
 ! Do not try to check it. Really.
 ! This is the most correct and precise code in the world. No jokes.
@@ -71,6 +71,54 @@ do m=1,ln
  x(:)=xx(:); enddo
  if (f==-1) x=x/n2
 end subroutine fft
+
+!----------------------------------------------------------------------------------------------
+integer function check_corr(ph,phs,a,as,mode_time)
+    complex(8),dimension(:):: ph,phs,a,as
+    complex(8),allocatable,dimension(:):: phf,af
+    real(8),allocatable,dimension(:):: cp
+    integer:: n1,nn,ln2,mode_n
+    real(8) mode_time,ad,phd
+    n1=size(a)
+    ln2=ceiling(dlog(dble(n1))/dlog(2d0))+1
+    nn=2**ln2
+
+    check_corr = 0
+    mode_n=min(nn-1,floor(nn*mode_time/1d-1))
+    if (mode_n < 1) then
+        return
+    endif
+    allocate(phf(0:nn-1),af(0:nn-1),cp(0:nn-1))
+    phf(0:n1-1)=ph(1:n1);phf(n1:nn-1) = (0d0,0d0)
+    af(0:n1-1)=a(1:n1);af(n1:nn-1) = (0d0,0d0)
+    call fft2(1,phf,nn,ln2); call fft2(1,af,nn,ln2)
+    cp = (cdabs(phf(:))/n1)*(cdabs(af(:))/reclen)
+    ad= sum((dreal(a(1:n1))-dreal(as(0:n1-1)))**2)/dble(n1-1)
+    phd= sum(cdabs(ph(1:n1)-phs(0:n1-1))**2)/dble(n1-1)
+    if (maxval(cp(0:mode_n)) >= dsqrt(ad*phd)/n1*z_value(n1)) then
+        check_corr = 1
+    endif
+    deallocate(phf,af,cp)
+end function check_corr
+
+!----------------------------------------------------------------------------------------------
+! Fast Fourier Transform #2
+! Used for series with length different of "n2"
+subroutine fft2(f,x,nn,ln2)
+integer:: nn,ln2
+complex(8),dimension(0:nn-1)::x,xx
+integer i,j,m,k,v,ni,jm,f
+do m=1,ln2
+ do k=0,2**(ln2-m)-1
+  do v=0,2**(m-1)-1
+   j=k*2**m+v;jm=2**(m-1)+j
+   i=k*2**(m-1)+v;ni=2**(ln2-1)+i
+   xx(j)=x(i)+x(ni)
+   xx(jm)=(x(i)-x(ni))*exp(dcmplx(0d0,-2d0*pi*dble(k*f)/dble(2**(ln2-m+1))))
+  enddo; enddo
+ x(:)=xx(:); enddo
+ if (f==-1) x=x/nn
+end subroutine fft2
 
 !----------------------------------------------------------------------------------------------
 subroutine init_planet_data()

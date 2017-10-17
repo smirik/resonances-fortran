@@ -2,9 +2,10 @@ module global_parameters
     implicit none
 !----------------------------------------------------------------------------------------------
 ! Global variables ----------------------------------------------------------------------------
-    real(8), parameter:: pi = dacos(-1d0), deg2pi = dacos(-1d0)/18d1
+    real(8), parameter:: pi = dacos(-1d0), deg2rad = dacos(-1d0)/18d1
     real(8), parameter:: twopi = pi*2d0
     real(8), parameter:: gp_k = 0.017202098795d0 ! or 1.720209895d−2 by IERS Conv. 2010
+    real(8), parameter:: gp_k2 = gp_k**2
 
 ! 13.03.2017
 ! IMPORTANT PARAMETERS: they are used for getting different modes of the program
@@ -13,13 +14,9 @@ module global_parameters
 
     logical,parameter:: use_only_integration = .false.
     logical,parameter:: just_id_matrices = .false.
-    logical,parameter:: allow_writing_metadata = .false.
-    logical,parameter:: allow_plotting = allow_writing_metadata .and. .true.
-    logical,parameter:: plot_all = allow_plotting .and. .false.
-    logical,parameter:: dispose_metadata = .true.
     logical,parameter:: force_aei_rebuilding = .false.
-    logical,parameter:: mode_2body=.true.
     logical,parameter:: mode_3body=.true.
+    logical,parameter:: mode_2body=mode_3body .or. .true.
 
 ! Parent directory. Determines automatically.
     character(255):: pwd
@@ -33,6 +30,7 @@ module global_parameters
     real(8), parameter:: r2_treshold_3body = pi/2.5d0
     real(8), parameter:: r2_treshold_2body = pi/2.5d0
     real(8), parameter:: sum_r2_treshold = 5d0
+    real(8), dimension(100:10001):: z_value
 ! Parameters for integrator module ------------------------------------------------------------
     integer, parameter:: kmax = 100
     real(8), parameter:: ep = 2457600.5d0
@@ -42,7 +40,7 @@ module global_parameters
     integer, parameter:: gp_max_order_2body = 10
     integer, parameter:: gp_max_value_3body = 7
     integer, parameter:: gp_max_value_2body = 11
-    real(8), parameter:: delta = 0d0
+    real(8)::  delta
 ! Planet data ---------------------------------------------------------------------------------
     real(8), dimension(0:9)::a_pl = (/0d0, &
                                       0.38709843d0, 0.72332102d0, 1.00000018d0, &
@@ -51,16 +49,16 @@ module global_parameters
 ! Taken from http://ssd.jpl.nasa.gov/?planet_pos
 ! Link case for "Keplerian elements for 3000 BC to 3000 AD"
 
-    real(8), dimension(0:9)::m_pl = (/0d0, &
+    real(8), dimension(0:9)::m_pl = (/1d0, &
                                       1.6601367952719304D-07, 2.4478383396645447D-06, 3.0404326462685257D-06, &
                                       3.2271514450538743D-07, 9.547919384243222D-04, 2.858859806661029D-04, &
                                       4.3662440433515637D-05, 5.151389020535497D-05, 7.407407407407407D-09/)
 ! Used: http://ssd.jpl.nasa.gov/?planet_phys_par
 
     real(8), dimension(0:9)::res_a_std_delta = (/0d0, &
-                                                 1d-2, 2d-2, 3d-2, &
-                                                 5d-2, 1d-1, 2d-1, &
-                                                 5d-1, 5d-1, 2d0/)
+                                                 1d-2, 1d-2, 1d-2, &
+                                                 1d-2, 1d-2, 1d-2, &
+                                                 1d-1, 1d-1, 1d-1/)
 ! I got them by experimental way
 
 !----------------------------------------------------------------------------------------------
@@ -100,16 +98,68 @@ module global_parameters
     end type arglist
 
 !----------------------------------------------------------------------------------------------
+    ! Structures for containing resonance data
+    type res_leaf_2body
+        character(8):: pl_name
+        integer,dimension(1:4):: res_num
+        real(8):: res_a
+        integer:: start_i
+        integer:: end_i
+        integer,allocatable,dimension(:):: clu
+        type(res_leaf_2body),pointer:: next
+    end type res_leaf_2body
+    type res_list_2body
+        integer:: listlen
+        type(res_leaf_2body),pointer:: first
+        type(res_leaf_2body),pointer:: current
+    end type res_list_2body
+
+    type res_leaf_3body
+        character(8):: pl_name
+        character(8):: pl2_name
+        integer,dimension(1:6):: res_num
+        real(8):: res_a
+        integer:: start_i
+        integer:: end_i
+        integer,allocatable,dimension(:):: clu
+        type(res_leaf_3body),pointer:: next
+    end type res_leaf_3body
+    type res_list_3body
+        integer:: listlen
+        type(res_leaf_3body),pointer:: first
+        type(res_leaf_3body),pointer:: current
+    end type res_list_3body
+
+!----------------------------------------------------------------------------------------------
 ! Structures for orbital element list
+    ! a-cluster. FUTURE MODIFIACTION - provide full functionality of a-clusters
+    type semiaxis_leaf
+        real(8):: a
+        real(8):: e
+        real(8):: incl
+        real(8):: argp
+        integer:: start_i
+        integer:: end_i
+        real(8):: min_a
+        real(8):: max_a
+        integer,allocatable,dimension(:):: item2
+        integer,allocatable,dimension(:):: item3
+        integer:: res2leader
+        integer:: res3leader
+    end type semiaxis_leaf
+
     type orb_elem
     ! Includes asteroid name and its orbital elements
-        character(25)::name
-        real(8),dimension(6)::elem
+        character(25):: name
+        real(8),dimension(6):: elem
     end type orb_elem
 
     type orb_elem_leaf
     ! Includes orb_elem item and reference to the next object
         type(orb_elem):: item
+        type(semiaxis_leaf),allocatable,dimension(:):: a_list
+        type(res_leaf_2body),allocatable,dimension(:):: r2list
+        type(res_leaf_3body),allocatable,dimension(:):: r3list
         type(orb_elem_leaf),pointer:: next
     end type orb_elem_leaf
 
@@ -119,19 +169,6 @@ module global_parameters
         type(orb_elem_leaf),pointer:: first
         type(orb_elem_leaf),pointer:: current
     end type orb_elem_list
-
-!----------------------------------------------------------------------------------------------
-! Here are structures for lists possibly to be included in next versions of the program
-    type res_list_2body
-        character(8):: pl_name
-        integer,dimension(1:4)::res_num
-    end type res_list_2body
-
-    type res_list_3body
-        character(8):: pl_name
-        character(8):: pl2_name
-        integer,dimension(1:6)::res_num
-    end type res_list_3body
 
 !----------------------------------------------------------------------------------------------
 ! Global names for common id_matrices

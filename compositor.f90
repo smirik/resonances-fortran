@@ -18,7 +18,7 @@ program compositor
     type(orb_elem_list)::elementlist
     type(arglist)::astlist
     character(25):: sample,s1,s2
-    integer:: i,i1,i2
+    integer:: i,j,i1,i2
 
 ! Deriving a directory where program is running
 call getcwd(pwd,s)
@@ -155,8 +155,11 @@ if (.not. use_only_integration) then
 
 ! Now performing global classification of resonances for asteroids in list
     if(.not. just_id_matrices) then
-        if (delta <= 0d0)&
-            write (*,*) 'Delta was not specified and will be chosen by internal methods'
+        open(unit=9,file=trim(pwd)//'/z_treshold.txt',action='read')
+        ! Read treshold coefficients for periodograms
+        do i=100,10001
+            read(9,*,iostat=s) j,z_value(j)
+        enddo
         if(mode_2body) call global_libration_processing(2, elementlist)
         if(mode_3body) call global_libration_processing(3, elementlist)
     endif
@@ -174,6 +177,25 @@ write (*, *) 'Clearing element lists...'
 
 elementlist%current=>elementlist%first
 do i=1,elementlist%listlen
+    if(allocated(elementlist%first%a_list)) then
+        do j=1,size(elementlist%first%a_list)
+            if(allocated(elementlist%first%a_list(j)%item2)) deallocate(elementlist%first%a_list(j)%item2)
+            if(allocated(elementlist%first%a_list(j)%item3)) deallocate(elementlist%first%a_list(j)%item3)
+        enddo
+        deallocate(elementlist%first%a_list)
+    endif
+    if(allocated(elementlist%first%r2list)) then
+        do j=1,size(elementlist%first%r2list)
+            if(allocated(elementlist%first%r2list(j)%clu)) deallocate(elementlist%first%r2list(j)%clu)
+        enddo
+        deallocate(elementlist%first%r2list)
+    endif
+    if(allocated(elementlist%first%r3list)) then
+        do j=1,size(elementlist%first%r3list)
+            if(allocated(elementlist%first%r3list(j)%clu)) deallocate(elementlist%first%r3list(j)%clu)
+        enddo
+        deallocate(elementlist%first%r3list)
+    endif
     elementlist%first=>elementlist%current%next
     deallocate(elementlist%current)
     elementlist%current=>elementlist%first
