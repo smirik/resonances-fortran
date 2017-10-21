@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/4xxi/resonances-fortran.svg?branch=master)](https://travis-ci.org/4xxi/resonances-fortran) [![Build Status](https://travis-ci.org/4xxi/resonances-fortran.svg?branch=develop)](https://travis-ci.org/4xxi/resonances-fortran)
+
 The purpose of the program is to find potential resonances for asteroids and identify them. Currently, 2-body and 3-body cases are available for handling.
 
 The software consists of the following modules:

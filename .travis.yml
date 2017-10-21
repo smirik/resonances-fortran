@@ -1,0 +1,18 @@
+---
+language: c
+
+before_install:
+  - sudo apt-get install gfortran
+  - sudo apt-get install ruby-full
+  - export FC="gfortran"
+  - export CXX="g++"
+  - export CC="gcc"
+  - export FSFLAG=-I
+
+install:
+  - sudo gem install funit
+
+script:
+  - make test
+
+sudo: required
