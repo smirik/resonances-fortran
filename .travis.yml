@@ -1,0 +1,15 @@
+---
+language: c
+
+before_install:
+  - sudo apt-get install gfortran
+  - sudo apt-get install ruby-full
+  - sudo apt-get install rubygems
+
+install:
+  - sudo gem install funit
+
+script:
+  - make test
+
+sudo: required
