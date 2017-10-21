@@ -7,7 +7,7 @@ end test
 test planet_name_test
     character(8):: pl1 = 'JUPITER'
 
-    assert_equal(pl1,planet_name(6))
+    assert_equal(pl1,planet_name(5))
 end test
 
 test planet_id_reverse_test
