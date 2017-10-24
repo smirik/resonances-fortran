@@ -63,17 +63,4 @@ contains
     end function count_axis_3body
 
 !----------------------------------------------------------------------------------------------
-    real(8) function a_from_n(n)
-    ! Get semimajor axis from mean motion
-    ! This function is left for support. It is not recommended to use it anymore.
-    ! Given:
-    !   n - mean motion of object
-    ! Returns:
-    !   <real(8)> - semimajor axis
-        real(8):: n
-
-        a_from_n = (gp_k/n)**(2d0/3d0)
-    end function a_from_n
-
-!----------------------------------------------------------------------------------------------
 end module resonant_axis

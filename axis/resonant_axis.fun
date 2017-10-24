@@ -2,20 +2,8 @@ test_suite resonant_axis
 
 real(8), parameter:: a_default = 1.00000261d0, k_default = 0.017202098795d0, n_default = 1.72020309d-02 
 
-test a_from_n_test
-    assert_equal_within(a_from_n(n_default), a_default, 1d-4)
-end test
-
 test n_from_a_test
     assert_equal_within(n_from_a(a_default), n_default, 1d-4)
-end test
-
-test n_from_a_reverse_test
-    real(8):: a, n
-    
-    n = n_from_a(a_default)
-    a = a_from_n(n)
-    assert_equal_within(a, a_default, 1d-4)
 end test
 
 test count_axis_2body_test

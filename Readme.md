@@ -22,10 +22,6 @@ There are some logical keys in `global_parameters.f90` that can be configured to
 
 * `use_only_integration`: if true, the program will just perform an integration (using Mercury6 package) and create .aei files without finding any resonances.
 * `just_id_matrices` will force the program only create files with id_matrices without finding any resonances and .aei files
-* `allow_writing_metadata` allows creating metadata files (usually for creating graphics following after that)
-* `allow_plotting` allows plotting graphics (works when creating metadata is allowed too)
-* `plot_all`"`: if plotting is allowed, all graphics for all cases (even circulations) will be drawn
-* `dispose_metadata` - delete metadata after using (because it can take a lot of disk memory
 * `force_aei_rebuilding`: if true, the integration will be performed even if corresponding .aei files already exist
 * `mode_2body`: turns on 2-body case
 * `mode_3body` turns on 3-body case
