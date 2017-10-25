@@ -1,4 +1,4 @@
-test_suite id_matrix
+test_suite idmatrix
 
 test get_idmatrix_status_test
     assert_true(get_idmatrix_status(5)>=-1)

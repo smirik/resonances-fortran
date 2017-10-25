@@ -2,7 +2,7 @@ program compositor
 
     use global_parameters, n => bin_numrec
     use resonant_axis
-    use id_matrix
+    use idmatrix
     use integrator
     use librations
     implicit none
