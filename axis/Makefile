@@ -18,6 +18,8 @@ $(module_objects) $(module_mods): $(module_sources)
 test:
 	echo 'tests in axis'
 	funit resonant_axis
+	funit idmatrix_2body_mod
+	funit idmatrix_3body_mod
 	funit idmatrix
 
 clean:
