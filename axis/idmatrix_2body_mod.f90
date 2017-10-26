@@ -4,7 +4,39 @@ module idmatrix_2body_mod
     use resonant_axis
     implicit none
 
+    character(16), parameter:: idmatrix_2body_format = '(4i4,f23.16)'
+
 contains
+
+!----------------------------------------------------------------------------------------------
+
+character(32) function idmatrix_name_2body(pl_name) result(s)
+! Returns file name that corresponds to a given idmatrix (2-body case)
+
+    character(8):: pl_name
+    s = "id_matrix_" // trim(pl_name) // ".dat"
+
+end function idmatrix_name_2body
+
+!----------------------------------------------------------------------------------------------
+
+subroutine validate_resonance_2body(un, m1, m, pl_id)
+! Support subroutine
+! Check whether the resonance has been already used or not
+! If not, then add a record to a corresponding file
+
+    integer, dimension(1:4):: resonance
+    integer:: un, m1, m, pl_id
+
+    ! Waste already observed cases
+    if (gcd(abs(m), m1) /= 1) then
+        return
+    endif
+    ! Look for main subresonance
+    resonance = (/ m1, m, 0, -m1 - m /)
+    write (un, idmatrix_2body_format) resonance, count_axis_2body(resonance, a_pl(pl_id), m_pl(pl_id))
+
+end subroutine validate_resonance_2body
 
 !----------------------------------------------------------------------------------------------
 
@@ -16,22 +48,17 @@ subroutine build_idmatrix_2body(pl_name)
 !   file with idmatrix_2body data
 
     integer:: pl_id, un
-    integer:: m1, m2, m
+    integer:: m1, m
     character(8):: pl_name
-    character(16):: co
-    integer, dimension(1:4):: resonance
 
     pl_id = planet_id(pl_name)
     un = 8 + pl_id
-    co = '(4i4,f23.16)'
-    open (unit = un, file = trim(pwd) // "/id_matrices/id_matrix_" // trim(pl_name) // ".dat", status = 'replace')
+    open (unit = un, file = trim(pwd) // trim(idmatrix_pwd) // &
+        trim(idmatrix_name_2body(pl_name)), status = 'replace')
+    ! Run over possible resonance configurations
     do m1 = 1, gp_max_value_2body
         do m = -1, max(-gp_max_value_2body, -m1 - gp_max_order_2body), -1
-            ! Waste already observed cases
-            if (gcd(abs(m), m1) /= 1) cycle
-            ! Look for main subresonance
-            resonance = (/ m1, m, 0, -m1 - m /)
-            write (un, co) resonance, count_axis_2body(resonance, a_pl(pl_id), m_pl(pl_id))
+            call validate_resonance_2body(un, m1, m, pl_id)
         enddo
     enddo
     close(un)
@@ -58,8 +85,8 @@ integer function get_idmatrix_2body_status(pl_id) result(s)
     else
         un = 8 + pl_id
         pl_name = planet_name(pl_id)
-        open (unit = un, file = trim(pwd) // "/id_matrices/id_matrix_" // &
-            trim(pl_name) // '.dat', action = 'read', iostat = s)
+        open (unit = un, file = trim(pwd) // trim(idmatrix_pwd) // &
+            trim(idmatrix_name_2body(pl_name)), action = 'read', iostat = s)
         if (s == 0) then
             close (un)
             s = -1
@@ -82,8 +109,8 @@ subroutine add_idmatrix_2body(pl_id)
 
     un = 8 + pl_id
     l = 0
-    open (unit = un, file = trim(pwd) // "/id_matrices/id_matrix_" // &
-        trim(planet_name(pl_id)) // '.dat', action = 'read', iostat = s)
+    open (unit = un, file = trim(pwd) // trim(idmatrix_pwd) // &
+        trim(idmatrix_name_2body(planet_name(pl_id))), action = 'read', iostat = s)
     if (s /= 0) then
         write (*, *) 'Cannot add idmatrix for ', planet_name(pl_id), &
             ' from file - this file does not exist.'

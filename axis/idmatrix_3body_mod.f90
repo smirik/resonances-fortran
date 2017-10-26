@@ -4,7 +4,40 @@ module idmatrix_3body_mod
     use resonant_axis
     implicit none
 
+    character(16), parameter:: idmatrix_3body_format = '(6i4,f23.16)'
+
 contains
+
+!----------------------------------------------------------------------------------------------
+
+character(32) function idmatrix_name_3body(pl_name, pl2_name) result(s)
+! Returns file name that corresponds to a given idmatrix (3-body case)
+
+    character(8):: pl_name, pl2_name
+    s = "id_matrix_" // trim(pl_name) // "_" // trim(pl2_name) // ".dat"
+
+end function idmatrix_name_3body
+
+!----------------------------------------------------------------------------------------------
+
+subroutine validate_resonance_3body(un, m1, m2, m, n1, n2)
+! Support subroutine
+! Check whether the resonance has been already used or not
+! If not, then add a record to a corresponding file
+
+    integer, dimension(1:6):: resonance
+    integer:: un, m1, m2, m
+    real(8):: n1, n2
+
+    ! Waste already observed cases
+    if (gcd(m1, gcd(abs(m2), abs(m))) /= 1 ) then
+        return
+    endif
+    ! Look for main subresonance
+    resonance = (/ m1, m2, m, 0, 0, -m1 - m2 - m /)
+    write (un, idmatrix_3body_format) resonance, count_axis_3body(resonance, n1, 0d0, n2, 0d0)
+
+end subroutine validate_resonance_3body
 
 !----------------------------------------------------------------------------------------------
 
@@ -19,38 +52,28 @@ subroutine build_idmatrix_3body(pl_name, pl2_name)
     integer:: pl_id, pl2_id, un
     integer:: m1, m2, m
     character(8):: pl_name, pl2_name
-    character(16):: co
-    integer, dimension(1:6):: resonance
     real(8):: n1, n2
 
     pl_id = planet_id(pl_name)
     pl2_id = planet_id(pl2_name)
     un = 8 + pl_id
-    co = '(6i4,f23.16)'
-    open (unit = un, file = trim(pwd) // "/id_matrices/id_matrix_" // &
-        trim(pl_name) // "_" // trim(pl2_name) // ".dat", status = 'replace')
+    open (unit = un, file = trim(pwd) // trim(idmatrix_pwd) // &
+        trim(idmatrix_name_3body(pl_name, pl2_name)), status = 'replace')
     n1 = n_from_a(a_pl(pl_id))
     n2 = n_from_a(a_pl(pl2_id))
+    ! Run over possible resonance configurations
     do m1 = 1, gp_max_value_3body
         do m2 = -gp_max_value_3body, floor(-n1 / n2 * m1)
             do m = min(gp_max_value_3body, max(1, -gp_max_order_3body - m1 - m2)), &
                 min(gp_max_value_3body, gp_max_order_3body - m1 - m2)
-                ! Waste already observed cases
-                if (gcd(m1, gcd(abs(m2), abs(m))) /= 1 ) cycle
-                ! Look for main subresonance
-                resonance = (/ m1, m2, m, 0, 0, -m1 - m2 - m /)
-                write (un, co) resonance, count_axis_3body(resonance, n1, 0d0, n2, 0d0)
+                call validate_resonance_3body(un, m1, m2, m, n1, n2)
             enddo
         enddo
         do m2 = ceiling(-n1 / n2 * m1), gp_max_value_3body
             if (m2 == 0) cycle
             do m = max(-gp_max_value_3body, min(-1, gp_max_order_3body - m1 - m2)), &
             max(-gp_max_value_3body, -m1 - m2 - gp_max_order_3body), -1
-                ! Waste already observed cases
-                if (gcd(m1, gcd(abs(m2), abs(m))) /= 1 ) cycle
-                ! Look for main subresonance
-                resonance = (/ m1, m2, m, 0, 0, -m1 - m2 - m /)
-                write (un, co) resonance, count_axis_3body(resonance, n1, 0d0, n2, 0d0)
+                call validate_resonance_3body(un, m1, m2, m, n1, n2)
             enddo
         enddo
     enddo
@@ -80,8 +103,8 @@ integer function get_idmatrix_3body_status(pl_id, pl2_id) result(s)
         un = 8 + pl_id
         pl_name = planet_name(pl_id)
         pl2_name = planet_name(pl2_id)
-        open (unit = un, file = trim(pwd) // "/id_matrices/id_matrix_" // &
-            trim(pl_name) // "_" // trim(pl2_name) // '.dat', action = 'read', iostat = s)
+        open (unit = un, file = trim(pwd) // trim(idmatrix_pwd) // &
+            trim(idmatrix_name_3body(pl_name, pl2_name)), action = 'read', iostat = s)
         if (s == 0) then
             close (un)
             s = -1
@@ -105,8 +128,8 @@ subroutine add_idmatrix_3body(pl_id, pl2_id)
 
     un = 8 + pl_id
     l = 0
-    open (unit = un, file = trim(pwd) // "/id_matrices/id_matrix_" // &
-        trim(planet_name(pl_id)) // "_" // trim(planet_name(pl2_id)) // '.dat', &
+    open (unit = un, file = trim(pwd) // trim(idmatrix_pwd) // &
+        trim(idmatrix_name_3body(planet_name(pl_id), planet_name(pl2_id))), &
         action = 'read', iostat = s)
     if (s /= 0) then
         write (*, *) 'Cannot add idmatrix for ', planet_name(pl_id), &
