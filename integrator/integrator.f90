@@ -1,74 +1,80 @@
 module integrator
 
-use global_parameters
-implicit none
+    use global_parameters
+    implicit none
 
-!----------------------------------------------------------------------------------------------
 contains
 
 !----------------------------------------------------------------------------------------------
-integer function find_asteroid(sample,f2,nrec,st) result(flag)
+
+integer function find_asteroid(sample,datafile,nrec,st) result(flag)
 ! Find orbital elements for a given asteroid.
 ! Given:
 !   sample - asteroid name
-!   f2 - file object for the source file (asteroids.bin by default)
+!   datafile - unit descriptor of the source file (asteroids.bin by default)
 !   nrec - number of records in the source file (480482 by this time)
 ! Returns:
 !   <integer> - status (0 - if record is found, 1 - if record is not found)
 !   st - the corresponding special type orb_elem object for a given asteroid
 !       (if no records found, returns as was)
-    integer f2,nrec
-    character(25)::sample
-    type(orb_elem):: st
-    integer a,z,o
 
-    write(*,*)'Seeking record about ',sample
-    flag=1
-    a=1; z=nrec
-    read(9,rec=a) st
-    if (st%name == sample) then
-        write(*,*) 'Found record: '
-        write(*,*) st
-        write(*,*) 'at position ',a
-        flag=0
-        return
+    integer:: datafile, nrec
+    character(25):: sample
+    type(orb_elem):: st, record_data
+    integer left_record, right_record, middle_record
+
+    write(*, *) 'Seeking record about ', sample
+    flag = 1
+    left_record = 1
+    right_record = nrec
+    ! Check if either first or last record is what we need
+    read(datafile, rec = left_record) record_data
+    if (record_data%name == sample) then
+        middle_record = left_record
+        flag = 0
     endif
-    read(9,rec=z) st
-    if (st%name == sample) then
-        write(*,*) 'Found record: '
-        write(*,*) st
-        write(*,*) 'at position ',z
-        flag=0
-        return
+    read(datafile, rec = right_record) record_data
+    if (record_data%name == sample) then
+        middle_record = right_record
+        flag = 0
     endif
-    do while (z-a>1)
-        o=(z+a)/2
-        read(9,rec=o) st
-        if (st%name == sample) then
-            write(*,*) 'Found record: '
-            write(*,*) st
-            write(*,*) 'at position ',o
-            flag=0
-            exit
-        else
-            if (st%name > sample) then
-                z=o
+
+    if (flag /= 0) then
+    ! Start pyramidal loop over records
+        do while (right_record - left_record > 1)
+            middle_record = (left_record + right_record) / 2
+            read(datafile, rec = middle_record) record_data
+            if (record_data%name == sample) then
+                flag = 0
+                exit
             else
-                a=o
+                if (record_data%name > sample) then
+                    right_record = middle_record
+                else
+                    left_record = middle_record
+                endif
             endif
-        endif
-    enddo
-    if (flag==1) write(*,*) '...Not found any record about ',sample
-    return
+        enddo
+    endif
+
+    if (flag == 0) then
+            write(*, *) 'Found record for ', record_data%name, 'at position ', middle_record
+            st = record_data
+    else
+        write(*, *) '...Not found any record about ', record_data%name
+    endif
+
 end function find_asteroid
 
 !----------------------------------------------------------------------------------------------
+
 subroutine mercury_processing(element_list)
 ! Performs integration of asteroids and creates .aei files if needed
 ! Given:
 !   element_list - special type list (see above) of asteroids and their orbital elements
 ! Produces:
 !   .aei files in "aeibase" directory
+
     integer i,j,s,block_counter,flag
     type(orb_elem_list):: element_list
 
@@ -120,7 +126,9 @@ subroutine mercury_processing(element_list)
         endif
     enddo
     write(*,*) '   .aei files created.'    
+
 end subroutine mercury_processing
 
 !----------------------------------------------------------------------------------------------
+
 end module integrator
