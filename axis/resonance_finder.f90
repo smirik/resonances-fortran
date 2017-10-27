@@ -1,7 +1,7 @@
 module resonance_finder
 
     use global_parameters
-    use id_matrix
+    use idmatrix
     implicit none
 
 type rscr

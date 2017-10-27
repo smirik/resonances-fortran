@@ -36,6 +36,7 @@ module global_parameters
     real(8), parameter:: ep = 2457600.5d0
     integer, parameter:: aei_numrec = 10001
 ! Parameters for id_matrices, resonance_finder etc. -------------------------------------------
+    character(64), parameter:: idmatrix_pwd = "/id_matrices/"
     integer, parameter:: gp_max_order_3body = 6
     integer, parameter:: gp_max_order_2body = 10
     integer, parameter:: gp_max_value_3body = 7
