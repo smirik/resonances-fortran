@@ -32,7 +32,10 @@ module global_parameters
     real(8), parameter:: sum_r2_treshold = 5d0
     real(8), dimension(100:10001):: z_value
 ! Parameters for integrator module ------------------------------------------------------------
-    integer, parameter:: kmax = 100
+    character(64), parameter:: aeibase_pwd = "/aeibase/"
+    character(64), parameter:: aeiplanet_pwd = "/aei_planet/"
+    character(64), parameter:: mercury_pwd = "/mercury/"
+    integer, parameter:: max_block_size = 100
     real(8), parameter:: ep = 2457600.5d0
     integer, parameter:: aei_numrec = 10001
 ! Parameters for id_matrices, resonance_finder etc. -------------------------------------------
