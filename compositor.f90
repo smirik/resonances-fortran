@@ -1,9 +1,10 @@
 program compositor
 
     use global_parameters, n => bin_numrec
+    use astdys_adapter
     use resonant_axis
     use idmatrix
-    use integrator
+    use mercury_adapter
     use librations
     implicit none
 
