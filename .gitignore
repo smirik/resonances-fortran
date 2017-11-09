@@ -34,18 +34,8 @@ axis/makeTestRunner
 *.app
 *.x
 
-# Metadata
-*.rp?
-*.rpout?
-*.per?
-*.phout?
-*.circ?
-*.smooth?
-*.png
-
+# Other
 *.bin
-id_matrices/
-aeibase/
-aei_planet/
-stuff/
-wd/
+input/
+output/
+*pycache*

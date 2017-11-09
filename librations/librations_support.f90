@@ -129,8 +129,8 @@ subroutine init_planet_data()
     allocate(arg_m(1:10,1:reclen),arg_l(1:10,1:reclen))
     do pl_id=1,9
         i=100+pl_id
-        open(unit=i,file=trim(pwd)//'/aei_planet/'//trim(planet_name(pl_id))//'.aei',&
-        action='read',iostat=s)
+        open(unit = i, file = trim(pwd) // trim(aeiplanet_pwd) // trim(planet_name(pl_id)) // '.aei', &
+        action = 'read', iostat = s)
         if (s/=0) then
             write(*,*) 'Error! ',planet_name(pl_id),'.aei cannot be opened.'
             write(*,*) 'This planet will be ignored in this session'
