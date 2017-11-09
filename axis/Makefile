@@ -6,6 +6,8 @@ module_sources= ../global_parameters.f90 \
         idmatrix_2body_mod.f90 \
         idmatrix_3body_mod.f90 \
         idmatrix.f90 \
+        resonance_finder_2body.f90 \
+        resonance_finder_3body.f90 \
         resonance_finder.f90
 
 module_objects = $(patsubst %.f90,%.o,$(module_sources))
