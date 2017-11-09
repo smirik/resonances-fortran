@@ -23,6 +23,7 @@ module global_parameters
 
 !----------------------------------------------------------------------------------------------
 ! Parameters for libration module -------------------------------------------------------------
+    character(64), parameter:: results_pwd = "/output/results/"
     real(8), parameter:: circulation_parameter = 1.7d3
     real(8), parameter:: libration_parameter = 18400d0
     integer, parameter:: aei_header = 4
@@ -31,15 +32,19 @@ module global_parameters
     real(8), parameter:: r2_treshold_2body = pi/2.5d0
     real(8), parameter:: sum_r2_treshold = 5d0
     real(8), dimension(100:10001):: z_value
-! Parameters for integrator module ------------------------------------------------------------
-    character(64), parameter:: aeibase_pwd = "/aeibase/"
-    character(64), parameter:: aeiplanet_pwd = "/aei_planet/"
+! Parameters for astdys_adapter module ------------------------------------------------------------
+    character(64), parameter:: input_pwd = "/input/"
+    character(64), parameter:: source_name = "asteroids.bin"
+    character(3), parameter:: search_method = 'num'
+! Parameters for mercury_adapter module ------------------------------------------------------------
+    character(64), parameter:: aeibase_pwd = "/output/aei/"
+    character(64), parameter:: aeiplanet_pwd = "/output/aei_planets/"
     character(64), parameter:: mercury_pwd = "/mercury/"
     integer, parameter:: max_block_size = 100
     real(8), parameter:: ep = 2457600.5d0
     integer, parameter:: aei_numrec = 10001
 ! Parameters for id_matrices, resonance_finder etc. -------------------------------------------
-    character(64), parameter:: idmatrix_pwd = "/id_matrices/"
+    character(64), parameter:: idmatrix_pwd = "/output/id_matrices/"
     integer, parameter:: gp_max_order_3body = 6
     integer, parameter:: gp_max_order_2body = 10
     integer, parameter:: gp_max_value_3body = 7

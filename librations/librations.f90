@@ -78,8 +78,8 @@ allocate(filter1(0:n2-1))
 
 call get_filter(1d1,0.024d0,80,filter1)!
 
-open(unit=1000,file=trim(pwd)//'/wd/'// &
-    'current_result_'//cmode//'.txt',status='replace')
+open(unit=1000,file=trim(pwd)//trim(results_pwd)// &
+    'result_'//cmode//'body.txt',status='replace')
 
 astlist%current=>astlist%first
 ! Run over asteroid list
@@ -105,9 +105,8 @@ do i=1,astlist%listlen
     endif
     write(*,*) '...'
     ! Open .aei for asteroid
-    open(unit=110,file=trim(pwd)//'/aeibase/'//trim(ast_aei),action='read',iostat=s)
+    open(unit = 110, file = trim(pwd) // trim(aeibase_pwd) // trim(ast_aei), action = 'read', iostat = s)
     ! If .aei cannot be opened
-    if (s/=0) open(unit=110,file=trim(pwd)//'/aei_bank/'//trim(ast_aei),action='read',iostat=s)
     if (s /= 0) then
         write(*,*) 'Error! ',ast_aei,' cannot be opened. This asteroid will be passed.'
         astlist%current=>astlist%current%next
@@ -308,8 +307,6 @@ do i=1,astlist%listlen
     astlist%current=>astlist%current%next
 enddo
 
-write(1000,*) '========================================================================'
-write(1000,*) '========================================================================'
 close(1000)
 deallocate(ph,ph_comp,ph_f,ph_f_smooth,ph_comp_smooth)
 deallocate(axis,axis_f,axis_f_smooth,axis_smooth)

@@ -1,24 +1,48 @@
 module astdys_adapter
 
-    use global_parameters
+    use global_parameters, nrecords => bin_numrec
     implicit none
 
 contains
 
 !----------------------------------------------------------------------------------------------
 
-integer function find_asteroid(ast_name, datafile, nrecords, ast_data) result(flag)
+logical function greater(a, b, method)
+! ">" logical operator for strings to be compared as "strings" (lexicographically)
+! or as "numbers" (numerically)
+! Given:
+!   a, b - strings
+!   method - must be 'lex' or 'num'
+! Returns:
+!   "true" or "false"
+
+    character(*):: a, b, method
+    integer:: i1, i2
+
+    select case (method)
+    case ('num')
+        read(a, *) i1
+        read(b, *) i2
+        greater = (i1 > i2)
+    case default
+        greater = (a > b)
+    end select
+
+end function greater
+
+!----------------------------------------------------------------------------------------------
+
+integer function find_asteroid(ast_name, datafile, ast_data) result(flag)
 ! Find orbital elements for a given asteroid.
 ! Given:
 !   ast_name - asteroid name used to find the data
 !   datafile - unit descriptor of the source file (asteroids.bin by default)
-!   nrecords - number of records in the source file (480482 at present)
 ! Returns:
 !   <integer> - status (0 - if record is found, 1 - if record is not found)
 !   ast_data - the corresponding special type orb_elem object for a given asteroid
 !       (if no records found, returns as was)
 
-    integer:: datafile, nrecords
+    integer:: datafile
     character(25):: ast_name
     type(orb_elem):: ast_data, record_data
     integer left_record, right_record, middle_record
@@ -48,7 +72,7 @@ integer function find_asteroid(ast_name, datafile, nrecords, ast_data) result(fl
                 flag = 0
                 exit
             else
-                if (record_data%name > ast_name) then
+                if (greater(record_data%name, ast_name, search_method)) then
                     right_record = middle_record
                 else
                     left_record = middle_record

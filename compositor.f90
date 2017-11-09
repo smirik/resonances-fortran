@@ -102,12 +102,13 @@ endif
 !----------------------------------------------------------------------------------------------
 ! Now try to find orbital information about asteroids in a list
 
-open(unit=9,file=trim(pwd)//'/asteroids.bin',access='direct',recl=sizeof(scr),action='read')
-write(*,*) 'astlist',astlist%listlen
+write(*, *) 'Trying to find the orbital information for ', astlist%listlen, ' asteroids.'
+open(unit = 9, file = trim(pwd) // trim(input_pwd) // trim(source_name), &
+    access = 'direct', recl = sizeof(scr), action = 'read')
 astlist%current=>astlist%first
 elementlist%listlen=0
 do i=1,astlist%listlen
-    if (find_asteroid(astlist%current%name,9,n,scr)==0) then
+    if (find_asteroid(astlist%current%name,9,scr)==0) then
         elementlist%listlen=elementlist%listlen+1
         if (elementlist%listlen==1) then
             allocate(elementlist%current)
@@ -156,7 +157,7 @@ if (.not. use_only_integration) then
 
 ! Now performing global classification of resonances for asteroids in list
     if(.not. just_id_matrices) then
-        open(unit=9,file=trim(pwd)//'/z_treshold.txt',action='read')
+        open(unit = 9, file = trim(pwd) // trim(input_pwd) // 'z_treshold.txt', action = 'read')
         ! Read treshold coefficients for periodograms
         do i=100,10001
             read(9,*,iostat=s) j,z_value(j)

@@ -19,7 +19,9 @@ gfortran -O2 -c librations.f90;
 cp librations.mod ../;
 cd ../
 gfortran -O2 axis/*.o astdys_adapter/*.o mercury_adapter/*.o librations/*.o compositor.f90 -o comp.x;
-mkdir -p aeibase
-mkdir -p aei_planet
-mkdir -p id_matrices
-mkdir -p wd
+
+mkdir -p input
+mkdir -p output/aei
+mkdir -p output/aei_planets
+mkdir -p output/id_matrices
+mkdir -p output/results
