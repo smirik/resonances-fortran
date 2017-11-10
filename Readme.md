@@ -20,6 +20,7 @@ For the references, please use:
 
 There are some logical keys in `global_parameters.f90` that can be configured to make a special mode of running the program. Those keys are:
 
+* `force_source_building`: if true, the program will create new binary source file and replace existing (requires basic source file `allnum.cat` from AstDyS catalog).
 * `use_only_integration`: if true, the program will just perform an integration (using Mercury6 package) and create .aei files without finding any resonances.
 * `just_id_matrices` will force the program only create files with id_matrices without finding any resonances and .aei files
 * `force_aei_rebuilding`: if true, the integration will be performed even if corresponding .aei files already exist
@@ -29,19 +30,22 @@ There are some logical keys in `global_parameters.f90` that can be configured to
 When all keys are configured, the program can be launched.
 
 ## Use program
+'http://hamilton.dm.unipi.it/~astdys2/catalogs/allnum.cat'
 
-1. To compile the software run:
+1. Download [AstDyS](http://hamilton.dm.unipi.it/astdys/index.php?pc=4) catalog of the orbital elements (`allnum.cat` by default) and move to the input directory
+   or, if you have installed Python 3 on your computer, run:
+
+```bash
+make source
+```
+
+   The currently used catalog version is available at [AstDyS 'allnum.cat'](http://hamilton.dm.unipi.it/~astdys2/catalogs/allnum.cat).
+   At the first time the program will build the binary source file `asteroids.bin` from it. This file will be used in consequent sessions.
+
+2. To compile the software run:
 
 ```bash
 make
-```
-
-2. Download [AstDyS](http://hamilton.dm.unipi.it/astdys/index.php?pc=4) catalog of the orbital elements. 
-
-3. Build `asteroids.bin` from it and move to the main directory. In order to build `asteroids.bin` file run the following command:
-
-```bash
-??
 ```
 
 After these steps you can use the program:
@@ -61,16 +65,12 @@ After these steps you can use the program:
 
 ### Meta information
 
-* When the program finishes, `.aei` files will be created and placed in `./aeibase/` directory, and `.aei` files for planets will appear in `./aei_planet/`.
-* Files with `id_matrices` will appear in `./id_matrices/` directory. Other files will be placed in `./wd/` directory.
-* `.rpout2/3` files contain the information about identified resonances for each asteroid. Each record includes:
+* When the program finishes, `.aei` files will be created and placed in `./output/aei/` directory, and `.aei` files for planets will appear in `./output/aei_planets/`.
+* Files with `id_matrices` will appear in `./output/id_matrices/` directory. The files with results by resonances will be placed in `./output/results/` directory.
+* The common files `result_2body.txt` and `result_2body.txt` contain the information about all found resonances over all given asteroid list. Each record includes:
+  * Asteroid name
   * Resonance (with planets and numbers)
-  * Classification verdict (1 - pure resonance, 0 - transient, -1 - circulation)
-  * Status of acknowledged, based on cross-Fourier analysis (1 - true, or 0 - false)
-* `.rp`, `.circ`, `.phout`, `.per`, `.smooth` files are metadata
-* `.png` files are graphics
-
-The common files `current_result_2.txt` and `current_result_3.txt` contain the information about all found resonances over all given asteroid list in the same format.
+  * Classification verdict (1 - pure resonance, 0 - transient)
 
 #### Cleaning
 

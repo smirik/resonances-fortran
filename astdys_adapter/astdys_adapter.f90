@@ -7,6 +7,78 @@ contains
 
 !----------------------------------------------------------------------------------------------
 
+integer function check_source(source) result (s)
+! Checks whether the binary source file exists.
+! (by default it is "asteroids.bin" from AstDys)
+! If not, returns -1
+! In other case, returns the number of records in it.
+
+    character(*) source
+    type(orb_elem):: scr
+    integer:: rec_counter
+
+    open(unit = 9, file = trim(source), &
+    access = 'direct', recl = sizeof(scr), action = 'read', iostat = s)
+    if (s /= 0) then
+        s = -1
+    else
+        rec_counter = 1
+        do
+            read(9, rec = rec_counter, iostat = s) scr
+            if (s /= 0) exit
+            rec_counter = rec_counter + 1
+        enddo
+        close(9)
+        s = rec_counter - 1
+    endif
+
+end function check_source
+
+!----------------------------------------------------------------------------------------------
+
+subroutine source_builder(rec_number, epoch)
+! Builds the binary source file using previously received source
+! (by default it is "allnum.cat" from AstDys)
+! Produces:
+!   rec_number - number of records in a new source
+
+    type(orb_elem):: scr
+    integer:: s, rec_counter
+    integer, intent(out):: rec_number
+    real(8), intent(out):: epoch
+
+    write(*, *) 'Trying to use basic source file for building source file.'
+    open(unit = 10, file = trim(pwd) // trim(input_pwd) // trim(basic_source_name), action = 'read', iostat = s)
+    if (s /= 0) stop ('Error! Cannot find '// trim(basic_source_name) // 'for building the source file. Program terminated.')
+    open(unit = 9, file = trim(pwd) // trim(input_pwd) // trim(source_name), &
+        access = 'direct', recl = sizeof(scr), status = 'replace')
+
+    ! Pass header of basic source file
+    do
+        read(10, *, iostat = s) scr%name
+        if (scr%name == 'END_OF_HEADER') then
+            read(10, '(a)')
+            exit
+        endif
+    enddo
+
+    rec_counter = 0
+    do
+        read(10, *, iostat = s) scr%name, epoch, scr%elem
+        if (s /= 0) exit
+        rec_counter = rec_counter + 1
+        scr%name = adjustl(scr%name)
+        write(9, rec = rec_counter) scr
+    enddo
+
+    close(9)
+    close(10)
+    rec_number = rec_counter
+    if (epoch < 2400000.0d0) epoch = epoch + 2400000.0d0
+
+end subroutine source_builder
+!----------------------------------------------------------------------------------------------
+
 logical function greater(a, b, method)
 ! ">" logical operator for strings to be compared as "strings" (lexicographically)
 ! or as "numbers" (numerically)

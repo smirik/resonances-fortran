@@ -25,6 +25,7 @@ program compositor
 call getcwd(pwd,s)
 if(s>0) &
     stop ('Error! Cannot get path to working directory. Maybe it is too long (>255 symbols).')
+
 ! When we need only id_matrices, we do not need anything else
 if (just_id_matrices) then
     write (*, *) 'Initiating idmatrix_2body...'
@@ -38,7 +39,11 @@ if (just_id_matrices) then
     stop
 endif
 !----------------------------------------------------------------------------------------------
-! At first we interpretate argument list
+
+! Check the source file
+n = check_source(trim(pwd) // trim(input_pwd) // trim(source_name))
+if (n <= 0 .or. force_source_building) call source_builder(n, epoch)
+! Interpretate argument list
 
 lenarg = command_argument_count()
 if (lenarg < 1) stop ('Error! No arguments found. Please follow the format described in documentation')
