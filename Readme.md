@@ -30,7 +30,6 @@ There are some logical keys in `global_parameters.f90` that can be configured to
 When all keys are configured, the program can be launched.
 
 ## Use program
-'http://hamilton.dm.unipi.it/~astdys2/catalogs/allnum.cat'
 
 1. Download [AstDyS](http://hamilton.dm.unipi.it/astdys/index.php?pc=4) catalog of the orbital elements (`allnum.cat` by default) and move to the input directory
    or, if you have installed Python 3 on your computer, run:
