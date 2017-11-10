@@ -5,7 +5,7 @@ res:
 #	for d in $(DIRS); do (cd $$d; $(MAKE) ); done
 
 source:
-    python3 astdys_loader.py
+	python3 astdys_loader.py
 
 prettify:
 	find . -name "*.f90"|xargs fprettify -i 4
