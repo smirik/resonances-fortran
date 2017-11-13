@@ -37,7 +37,7 @@ logical function invalid_asteroid_aei(small_in, ast_item) result(l)
         close(110)
         l = .false.
     else
-        write(small_in, *) ast_item%name, ' ep=', ep
+        write(small_in, *) ast_item%name, ' ep=', epoch
         write(small_in, *) ast_item%elem(1), ast_item%elem(2), ast_item%elem(3), &
             ast_item%elem(5), ast_item%elem(4), ast_item%elem(6), ' 0d0 0d0 0d0'
         l = .true.
