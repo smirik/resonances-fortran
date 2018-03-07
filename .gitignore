@@ -39,3 +39,6 @@ axis/makeTestRunner
 input/
 output/
 *pycache*
+aei_planet/
+id_matrices/
+wd/
