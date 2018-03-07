@@ -1,3 +1,8 @@
+# Ignore test compiled files
+axis/TestRunner*
+axis/makeTestRunner
+*_fun.f90
+
 # Compiled Object files
 *.slo
 *.lo
@@ -27,3 +32,10 @@
 *.exe
 *.out
 *.app
+*.x
+
+# Other
+*.bin
+input/
+output/
+*pycache*

@@ -1,14 +1,29 @@
-main: main.o functions.o resonance_table.o
-	gfortran -o axis main.o functions.o resonance_table.o
+comp= gfortran
+firstmodule= global_parameters
 
-functions.o: functions.f90  
-	gfortran -c functions.f90
+module_sources= ../global_parameters.f90 \
+        resonant_axis.f90 \
+        idmatrix_2body_mod.f90 \
+        idmatrix_3body_mod.f90 \
+        idmatrix.f90 \
+        resonance_finder_2body.f90 \
+        resonance_finder_3body.f90 \
+        resonance_finder.f90
 
-resonance_table.o: resonance_table.f90
-	gfortran -c resonance_table.f90
+module_objects = $(patsubst %.f90,%.o,$(module_sources))
+module_mods = $(patsubst %.f90,%.mod,$(module_sources))
 
-main.o: main.f90
-	gfortran -c main.f90
+$(module_objects) $(module_mods): $(module_sources)
+	for i in $^;do $(comp) -O2 -c $$i;echo "gfortran -O2 -c" $$i;done
+
+#Run tests after all object files created
+test:
+	echo 'tests in axis'
+	funit resonant_axis
+	funit idmatrix_2body_mod
+	funit idmatrix_3body_mod
+	funit idmatrix
 
 clean:
-	rm -f *.o axis
+	rm -f *.o *.mod axis
+	funit --clean
