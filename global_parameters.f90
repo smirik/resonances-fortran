@@ -34,7 +34,7 @@ module global_parameters
     real(8), dimension(100:10001):: z_value
 ! Parameters for astdys_adapter module ------------------------------------------------------------
     integer:: bin_numrec = 480482
-    real(8):: epoch = 2457600.5d0
+    real(8):: epoch = 2458400.5d0
     character(64), parameter:: input_pwd = "/input/"
     character(64), parameter:: basic_source_name = "allnum.cat"
     character(64), parameter:: source_name = "asteroids.bin"
@@ -288,14 +288,14 @@ contains
     ! <real(8)> - normalized angle
         real(8),intent(in):: an
         real(8):: t,ds
-        real(8):: norm_ang 
+        real(8):: norm_ang
 
         t=an;ds=dsign(1d0,an)
         do while(dabs(t)>pi)
             t=t-ds*pi*2d0
         enddo
         norm_ang=t
-    end function norm_ang    
+    end function norm_ang
 
 !----------------------------------------------------------------------------------------------
     real(8) function n_from_a(a)

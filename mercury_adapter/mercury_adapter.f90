@@ -62,7 +62,7 @@ subroutine make_integration(j)
         enddo
         ! Move new .aei files to a needed directory and clean the workplace
         call execute_command_line("mv *.aei " // trim(pwd) // trim(aeibase_pwd) // &
-            "; ./simple_clean.sh", wait = .true.)
+            "; make rm-gen", wait = .true.)
         call chdir(trim(pwd))
 
 end subroutine make_integration
@@ -85,7 +85,7 @@ subroutine mercury_processing(element_list)
     block_counter = element_list%listlen / max_block_size
     do j = 0, block_counter
         open(unit = 8, file = trim(pwd) // trim(mercury_pwd) // 'small.in', status = 'replace')
-        call small_in_header(8) 
+        call small_in_header(8)
         flag = 0
         ! Check that planet .aei files are available
         do i = 1, 8
