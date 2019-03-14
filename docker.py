@@ -51,3 +51,13 @@ for i in range(args.cpu):
     f.close
     st = os.stat(filename)
     os.chmod(filename, st.st_mode | stat.S_IEXEC)
+
+run_filename = args.localdir+'/run.sh'
+run_file = open(run_filename,"w+")
+run_command = "nohup ./cpu{0}.sh &>/dev/null &\n"
+for i in range(args.cpu):
+    filename = run_command.format(i)
+    run_file.write(filename)
+run_file.close
+st = os.stat(run_filename)
+os.chmod(run_filename, st.st_mode | stat.S_IEXEC)
