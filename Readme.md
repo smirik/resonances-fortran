@@ -4,11 +4,11 @@ The purpose of the program is to find potential resonances for asteroids and ide
 
 The software consists of the following modules:
 
-* resonant axis calculator, 
-* resonance finder, 
-* integrator ([mercury6](https://github.com/4xxi/mercury) is used), 
+* resonant axis calculator,
+* resonance finder,
+* integrator ([mercury6](https://github.com/4xxi/mercury) is used),
 * phase builder,
-* classifier, 
+* classifier,
 * compositor etc.
 
 For the references, please use:
@@ -60,6 +60,23 @@ After these steps you can use the program:
 ```bash
 ./comp.x -list 1013 99942 309239 499
 ./comp.x -range 1 1000
+```
+
+#### Run under docker
+
+Note that you should have a folder called `/root/output` (or replace it with another one) that has 4 sub-folders: `aei`, `aei_planets`, `id_matrices`, `results`. It will be mounted to docker in order to save the results in the files.
+
+Of course, you have to install docker locally.
+
+```bash
+docker run -v /root/output:/root/resonances/output smirik/resonances-fortran ./comp.x -list 490 2348
+docker run -v /root/output:/root/resonances/output smirik/resonances-fortran ./comp.x -range 1 100
+```
+
+If you want to build a new container:
+
+```bash
+docker build -t yourname/your-container-name .
 ```
 
 ### Meta information
