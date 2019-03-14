@@ -1,5 +1,9 @@
 #!/bin/bash
-cd mercury ; ./compile.sh;
+git submodule init
+git submodule update --recursive
+cd mercury ;
+sed -i -e 's/3000000.5d0/38982600.5d0/g' param.in.sample
+make build && make gen-in;
 cd ../axis ; make;
 cp *.mod ../; cp *.mod ../librations/
 cp global_parameters.mod ../astdys_adapter/;
