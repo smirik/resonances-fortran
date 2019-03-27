@@ -63,6 +63,23 @@ After these steps you can use the program:
 ./comp.x -range 1 1000
 ```
 
+#### Run under docker
+
+Note that you should have a folder called `/root/output` (or replace it with another one) that has 4 sub-folders: `aei`, `aei_planets`, `id_matrices`, `results`. It will be mounted to docker in order to save the results in the files.
+
+Of course, you have to install docker locally.
+
+```bash
+docker run -v /root/output:/root/resonances/output smirik/resonances-fortran ./comp.x -list 490 2348
+docker run -v /root/output:/root/resonances/output smirik/resonances-fortran ./comp.x -range 1 100
+```
+
+If you want to build a new container:
+
+```bash
+docker build -t yourname/your-container-name .
+```
+
 ### Meta information
 
 * When the program finishes, `.aei` files will be created and placed in `./output/aei/` directory, and `.aei` files for planets will appear in `./output/aei_planets/`.
