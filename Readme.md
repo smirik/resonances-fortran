@@ -4,11 +4,11 @@ The purpose of the program is to find potential resonances for asteroids and ide
 
 The software consists of the following modules:
 
-* resonant axis calculator, 
-* resonance finder, 
-* integrator ([mercury6](https://github.com/4xxi/mercury) is used), 
+* resonant axis calculator,
+* resonance finder,
+* integrator ([mercury6](https://github.com/4xxi/mercury) is used),
 * phase builder,
-* classifier, 
+* classifier,
 * compositor etc.
 
 For the references, please use:
@@ -54,6 +54,7 @@ After these steps you can use the program:
 
 * if `-list` key is used, just provide a list of asteroid names.
 * if `-range` key is used, specify only first and last asteroid.
+* Don't forget to update mercury/param.in.sample before the compilation and set the end date you want (in case of `100000` years you may set it to `stop time (days) = 38982600.5d0`).
 
 ### Examples
 
