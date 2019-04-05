@@ -5,7 +5,8 @@ res:
 #	for d in $(DIRS); do (cd $$d; $(MAKE) ); done
 
 source:
-	python3 astdys_loader.py
+	curl "http://hamilton.dm.unipi.it/~astdys2/catalogs/allnum.cat" -o input/allnum.cat
+	@echo AstDyS Catalog was downloaded
 
 prettify:
 	find . -name "*.f90"|xargs fprettify -i 4
